@@ -1,0 +1,123 @@
+﻿@using Platform_Learning_Test.Models.Account
+@model RegisterModel
+
+@{
+    ViewData["Title"] = "Регистрация";
+}
+
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">@ViewData["Title"]</h2>
+
+                <form asp-action="Register" method="post" id="registerForm">
+                    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+                    <div class="form-group">
+                        <label asp-for="UserName" class="font-weight-bold"></label>
+                        <input asp-for="UserName" class="form-control"
+                               placeholder="Ваш логин" autocomplete="username" />
+                        <span asp-validation-for="UserName" class="text-danger small"></span>
+                        <small class="form-text text-muted">
+                            От 3 до 256 символов (латинские буквы, цифры, _-)
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Email" class="font-weight-bold"></label>
+                        <input asp-for="Email" class="form-control"
+                               placeholder="example@email.com"
+                               autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Name" class="font-weight-bold"></label>
+                        <input asp-for="Name" class="form-control"
+                               placeholder="Ваше полное имя" />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Password" class="font-weight-bold"></label>
+                        <div class="input-group">
+                            <input asp-for="Password" type="password"
+                                   class="form-control" placeholder="••••••••"
+                                   autocomplete="new-password"
+                                   data-toggle="password" />
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary toggle-password" type="button">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                        <small class="form-text text-muted">
+                            Минимум 8 символов, цифры, заглавные и строчные буквы
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword" class="font-weight-bold"></label>
+                        <input asp-for="ConfirmPassword" type="password"
+                               class="form-control" placeholder="••••••••"
+                               autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-user-plus mr-2"></i>Зарегистрироваться
+                    </button>
+                </form>
+            </div>
+
+            <div class="card-footer text-center">
+                Уже есть аккаунт? <a asp-action="Login" class="text-primary">Войдите</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+
+            $('.toggle-password').click(function() {
+                const icon = $(this).find('i');
+                const input = $(this).closest('.input-group').find('input');
+
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            $('#Email').on('blur', function() {
+                $(this).val($(this).val().trim().toLowerCase());
+            });
+
+            $('#UserName').on('blur', function() {
+                $(this).val($(this).val().trim());
+            });
+
+            $('#Password').on('input', function() {
+                const password = $(this).val();
+                const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+                if (password.length > 0 && !regex.test(password)) {
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+        });
+    </script>
+}

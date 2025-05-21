@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "Learning Platform | Главная";
+}
+
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Откройте мир знаний с нашей платформой</h1>
+            <p class="lead">Интерактивное обучение, тесты и практика для всех уровней</p>
+            <a asp-controller="Tests" asp-action="Index" class="btn btn-primary btn-lg">Начать обучение</a>
+        </div>
+    </div>
+</div>
+
+<section class="categories-section">
+    <div class="container">
+        <h2>Направления обучения</h2>
+        <div class="categories-grid">
+            <div class="category-card">
+                <div class="category-icon" style="background-color: #4CAF50;">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3>Программирование</h3>
+                <p>Изучайте Python, C#, JavaScript и другие языки</p>
+            </div>
+            <div class="category-card">
+                <div class="category-icon" style="background-color: #2196F3;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Аналитика данных</h3>
+                <p>SQL, Power BI, машинное обучение</p>
+            </div>
+            <div class="category-card">
+                <div class="category-icon" style="background-color: aqua;">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3>Дизайн и графика </h3>
+                <p>Figma,Photoshop, UX и UI дизайн,веб-дизайн</p>
+            </div>
+            <div class="category-card">
+                <div class="category-icon" style="background-color: darkturquoise">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3>Английский язык </h3>
+                <p>Для всех уровнней A1,A2,B1,B2</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="benefits-section">
+    <div class="container">
+        <h2>Почему выбирают нас?</h2>
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>Экспертные знания</h3>
+                <p>Контент создается профессионалами в своих областях</p>
+            </div>
+            <div class="benefit-card">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>Доступность</h3>
+                <p>Учитесь в любое время с любого устройства</p>
+            </div>
+            <div class="benefit-card">
+                <i class="fas fa-check"></i>
+                <h3>Качество</h3>
+                <p>Используйте только современные технологии и оборудование</p>
+            </div>
+
+        </div>
+    </div>
+</section>
