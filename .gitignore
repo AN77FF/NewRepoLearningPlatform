@@ -1,0 +1,30 @@
+# Visual Studio и .NET
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.csproj.user
+*.csproj.user
+appsettings.Development.json
+
+# Скомпилированные файлы
+*.exe
+*.dll
+*.pdb
+*.cache
+
+# Базы данных
+*.mdf
+*.ldf
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+
+# NuGet
+packages/
