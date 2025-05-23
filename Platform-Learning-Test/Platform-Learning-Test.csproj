@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Platform-Learning-Test.Common\Platform-Learning-Test.Common.csproj" />
+    <ProjectReference Include="..\Platform_Learning_Test.Common\Platform-Learning-Test.Common.csproj" />
     <ProjectReference Include="..\Platform_Learning_Test.Data\Platform_Learning_Test.Data.csproj" />
     <ProjectReference Include="..\Platform_Learning_Test.Service\Platform_Learning_Test.Service.csproj" />
   </ItemGroup>

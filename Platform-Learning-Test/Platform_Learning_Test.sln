@@ -5,8 +5,6 @@ VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Platform-Learning-Test", "Platform-Learning-Test.csproj", "{A850CD4D-8966-4624-A625-F00378F73288}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Platform-Learning-Test.Common", "..\Platform-Learning-Test.Common\Platform-Learning-Test.Common.csproj", "{928E9583-4BAB-42C6-B8A5-1DD69FEF12D7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Platform_Learning_Test.Data", "..\Platform_Learning_Test.Data\Platform_Learning_Test.Data.csproj", "{62553E21-E5A2-4753-8B51-24FEAC3E6AE3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Platform_Learning_Test.Domain", "..\Platform_Learning_Test.Domain\Platform_Learning_Test.Domain.csproj", "{46B6F732-33D8-4954-AC01-79CF4D770620}"
@@ -14,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Platform_Learning_Test.Service", "..\Platform_Learning_Test.Service\Platform_Learning_Test.Service.csproj", "{482844BD-77D8-4643-8C1D-5ABC1CD7A7BF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PlatformLearningTestNewRepo", "PlatformLearningTestNewRepo", "{4E2C0F82-F36C-4395-877D-75F1B901E93B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Platform-Learning-Test.Common", "..\Platform_Learning_Test.Common\Platform-Learning-Test.Common.csproj", "{600EE2E4-6870-41F3-96C9-73D964FBE574}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +25,6 @@ Global
 		{A850CD4D-8966-4624-A625-F00378F73288}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A850CD4D-8966-4624-A625-F00378F73288}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A850CD4D-8966-4624-A625-F00378F73288}.Release|Any CPU.Build.0 = Release|Any CPU
-		{928E9583-4BAB-42C6-B8A5-1DD69FEF12D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{928E9583-4BAB-42C6-B8A5-1DD69FEF12D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{928E9583-4BAB-42C6-B8A5-1DD69FEF12D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{928E9583-4BAB-42C6-B8A5-1DD69FEF12D7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62553E21-E5A2-4753-8B51-24FEAC3E6AE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62553E21-E5A2-4753-8B51-24FEAC3E6AE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62553E21-E5A2-4753-8B51-24FEAC3E6AE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -41,13 +37,16 @@ Global
 		{482844BD-77D8-4643-8C1D-5ABC1CD7A7BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{482844BD-77D8-4643-8C1D-5ABC1CD7A7BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{482844BD-77D8-4643-8C1D-5ABC1CD7A7BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{600EE2E4-6870-41F3-96C9-73D964FBE574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{600EE2E4-6870-41F3-96C9-73D964FBE574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{600EE2E4-6870-41F3-96C9-73D964FBE574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{600EE2E4-6870-41F3-96C9-73D964FBE574}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A850CD4D-8966-4624-A625-F00378F73288} = {4E2C0F82-F36C-4395-877D-75F1B901E93B}
-		{928E9583-4BAB-42C6-B8A5-1DD69FEF12D7} = {4E2C0F82-F36C-4395-877D-75F1B901E93B}
 		{62553E21-E5A2-4753-8B51-24FEAC3E6AE3} = {4E2C0F82-F36C-4395-877D-75F1B901E93B}
 		{46B6F732-33D8-4954-AC01-79CF4D770620} = {4E2C0F82-F36C-4395-877D-75F1B901E93B}
 		{482844BD-77D8-4643-8C1D-5ABC1CD7A7BF} = {4E2C0F82-F36C-4395-877D-75F1B901E93B}
