@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Platform_Learning_Test.Data.Factory
 {
@@ -10,7 +11,12 @@ namespace Platform_Learning_Test.Data.Factory
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
-
+        public DbSet<Test> Tests { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<AnswerOption> AnswerOptions { get; set; }
+        public DbSet<UserAnswer> UserAnswers { get; set; }
+        public DbSet<TestReview> TestReviews { get; set; }
+        public DbSet<UserTestHistory> UserTestHistories { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options) { }
@@ -31,6 +37,8 @@ namespace Platform_Learning_Test.Data.Factory
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            ConfigureTestSystemEntities(builder);
+           
 
             builder.Entity<User>(entity =>
             {
@@ -123,15 +131,59 @@ namespace Platform_Learning_Test.Data.Factory
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            foreach (var entity in builder.Model.GetEntityTypes())
-            {
-                entity.SetTableName(entity.GetTableName().ToLowerInvariant());
-
-                foreach (var property in entity.GetProperties())
-                {
-                    property.SetColumnName(property.GetColumnName().ToLowerInvariant());
-                }
-            }
         }
+             private void ConfigureTestSystemEntities(ModelBuilder builder)
+        {
+            builder.Entity<Test>(entity =>
+            {
+                entity.ToTable("Tests"); 
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.Title).IsRequired().HasMaxLength(200);
+                entity.Property(t => t.Description).HasMaxLength(1000);
+                entity.Property(t => t.Category).HasMaxLength(100);
+                entity.Property(t => t.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                
+                entity.Property(t => t.Difficulty)
+               .HasConversion<string>(); 
+
+                entity.HasMany(t => t.Questions)
+                    .WithOne(q => q.Test)
+                    .HasForeignKey(q => q.TestId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            builder.Entity<Question>(entity =>
+            {
+                entity.Property(q => q.Text).IsRequired().HasMaxLength(1000);
+                entity.Property(q => q.TimeLimitSeconds).HasDefaultValue(60);
+
+                entity.HasMany(q => q.AnswerOptions)
+                    .WithOne(a => a.Question)
+                    .HasForeignKey(a => a.QuestionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<AnswerOption>(entity =>
+            {
+                entity.Property(a => a.Text).IsRequired().HasMaxLength(500);
+            });
+
+            builder.Entity<UserTestHistory>(entity =>
+            {
+                entity.Property(h => h.StartedAt).HasDefaultValueSql("GETUTCDATE()");
+
+                entity.HasMany(h => h.UserAnswers)
+                    .WithOne(a => a.UserTestHistory)
+                    .HasForeignKey(a => a.UserTestHistoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            builder.Entity<TestReview>(entity =>
+            {
+                entity.Property(r => r.Text).IsRequired().HasMaxLength(2000);
+                entity.Property(r => r.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            });
+        }
+
+        
     }
 }

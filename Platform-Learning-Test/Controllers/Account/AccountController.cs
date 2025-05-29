@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Platform_Learning_Test.Domain.Entities;
 using Platform_Learning_Test.Models.Account;
+using Platform_Learning_Test.Service.Service;
 
 namespace Platform_Learning_Test.Controllers.Account
 {
@@ -12,17 +15,20 @@ namespace Platform_Learning_Test.Controllers.Account
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly ILogger<AccountController> _logger;
+        private readonly ITestResultService _testResultService;
 
         public AccountController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             RoleManager<Role> roleManager,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            ITestResultService testResultService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _logger = logger;
+            _testResultService = testResultService;
         }
 
         [HttpGet]
@@ -165,6 +171,22 @@ namespace Platform_Learning_Test.Controllers.Account
         public IActionResult ForgotPasswordConfirmation()
         {
             return View();
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var user = await _userManager.GetUserAsync(User);
+            var results = await _testResultService.GetUserResultsAsync(userId);
+
+            var model = new ProfileModel
+            {
+                User = user,
+                TestResults = results
+            };
+
+            return View(model);
         }
     }
 }

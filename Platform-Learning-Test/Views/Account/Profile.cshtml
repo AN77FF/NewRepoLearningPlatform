@@ -1,0 +1,12 @@
+﻿@model Platform_Learning_Test.Models.Account.ProfileModel
+
+<h2>Профиль пользователя: @Model.User.Name</h2>
+
+<h3>Мои результаты:</h3>
+@foreach (var result in Model.TestResults)
+{
+    <div class="result-item">
+        <p>Тест: @result.TestTitle</p>
+        <p>Оценка: @result.ScorePercentage%</p>
+    </div>
+}

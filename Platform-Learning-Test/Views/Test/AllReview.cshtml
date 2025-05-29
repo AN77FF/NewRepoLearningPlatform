@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Platform_Learning_Test.Domain.Entities.TestReview>
+
+@{
+    ViewData["Title"] = "Отзывы о тесте";
+    var testId = ViewBag.TestId;
+}
+
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="mb-4">
+            <a asp-action="Create" asp-route-testId="@testId" class="btn btn-primary">Оставить отзыв</a>
+        </div>
+    }
+
+    <div class="row">
+        @foreach (var review in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h5 class="card-title">@review.User.Name</h5>
+                            <small class="text-muted">@review.CreatedAt.ToString("g")</small>
+                        </div>
+                        <p class="card-text">@review.Text</p>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="mt-2">
+                                <a asp-action="Delete" asp-route-id="@review.Id" class="btn btn-sm btn-danger">Удалить</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <a asp-controller="Tests" asp-action="Details" asp-route-id="@testId" class="btn btn-secondary">Назад к тесту</a>
+</div>

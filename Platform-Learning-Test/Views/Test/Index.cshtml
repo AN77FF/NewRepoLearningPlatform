@@ -1,0 +1,36 @@
+﻿@model TestCategoryViewModel
+
+<div class="container">
+   
+    <div class="category-filter mb-4">
+        @foreach (var category in Model.Categories)
+        {
+            <a href="@Url.Action("Index", new { category })"
+               class="btn btn-outline-primary m-1">
+                @category
+            </a>
+        }
+    </div>
+
+   
+    <div class="row">
+        @foreach (var test in Model.Tests)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@test.Title</h5>
+                        <p class="card-text">@test.Description</p>
+                        <span class="badge bg-secondary">@test.Category</span>
+                    </div>
+                    <div class="card-footer">
+                        <a asp-action="Details" asp-route-id="@test.Id"
+                           class="btn btn-primary">
+                            Начать тест
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

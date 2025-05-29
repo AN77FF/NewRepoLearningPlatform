@@ -1,0 +1,157 @@
+﻿@model Platform_Learning_Test.Domain.Dto.TestDetailDto
+
+@{
+    ViewData["Title"] = $"Тест: {Model.Title}";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>@Model.Title</h4>
+            <p class="mb-0">@Model.Description</p>
+        </div>
+
+        <div class="card-body">
+            <div id="testContainer">
+                <div class="text-center mb-4">
+                    <h5>Инструкция</h5>
+                    <p>Тест содержит @Model.Questions.Count вопросов. У вас есть ограниченное время на каждый вопрос.</p>
+                    <button id="startTestBtn" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play"></i> Начать тест
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let currentQuestion = 0;
+            const questions = @Html.Raw(Json.Serialize(Model.Questions));
+            const testId = @Model.Id;
+            let timer;
+            let timeLeft;
+
+            $('#startTestBtn').click(function() {
+                loadQuestion(0);
+                startTimer();
+            });
+
+            function startTimer() {
+                // Таймер для всего теста (опционально)
+            }
+
+            function loadQuestion(index) {
+                if (index >= questions.length) {
+                    showCompletionScreen();
+                    return;
+                }
+
+                const question = questions[index];
+                timeLeft = question.timeLimitSeconds;
+                updateTimerDisplay();
+
+                let answersHtml = '';
+                question.answerOptions.forEach((answer, i) => {
+                    answersHtml += `
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio"
+                                   name="question_${question.id}"
+                                   id="answer_${answer.id}"
+                                   value="${answer.id}">
+                            <label class="form-check-label" for="answer_${answer.id}">
+                                ${answer.text}
+                            </label>
+                        </div>
+                    `;
+                });
+
+                $('#testContainer').html(`
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Вопрос ${index + 1} из ${questions.length}</span>
+                            <span id="timer" class="badge bg-danger">${timeLeft} сек</span>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">${question.text}</h5>
+                                <div class="answers-container mt-3">
+                                    ${answersHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-outline-secondary ${index === 0 ? 'disabled' : ''}"
+                                onclick="loadQuestion(${index - 1})">
+                            <i class="fas fa-arrow-left"></i> Назад
+                        </button>
+                        <button class="btn btn-primary" onclick="loadQuestion(${index + 1})">
+                            ${index === questions.length - 1 ? 'Завершить тест' : 'Следующий вопрос'}
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                `);
+
+                currentQuestion = index;
+                startQuestionTimer(question.timeLimitSeconds);
+            }
+
+            function startQuestionTimer(seconds) {
+                clearInterval(timer);
+                timeLeft = seconds;
+                updateTimerDisplay();
+
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        if (currentQuestion < questions.length - 1) {
+                            loadQuestion(currentQuestion + 1);
+                        } else {
+                            showCompletionScreen();
+                        }
+                    }
+                }, 1000);
+            }
+
+            function updateTimerDisplay() {
+                const timerElement = $('#timer');
+                if (timerElement.length) {
+                    timerElement.text(`${timeLeft} сек`);
+
+                    if (timeLeft <= 10) {
+                        timerElement.removeClass('bg-success bg-warning').addClass('bg-danger');
+                    } else if (timeLeft <= 20) {
+                        timerElement.removeClass('bg-success bg-danger').addClass('bg-warning');
+                    } else {
+                        timerElement.removeClass('bg-warning bg-danger').addClass('bg-success');
+                    }
+                }
+            }
+
+            function showCompletionScreen() {
+                clearInterval(timer);
+
+                $('#testContainer').html(`
+                    <div class="text-center">
+                        <h4>Тест завершен!</h4>
+                        <p>Вы ответили на все вопросы.</p>
+                        <form id="submitTestForm" method="post"
+                              asp-controller="TestResults" asp-action="Submit">
+                            <input type="hidden" name="testId" value="${testId}" />
+                            <div id="answersInputs"></div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Отправить результаты
+                            </button>
+                        </form>
+                    </div>
+                `);
+            }
+        });
+    </script>
+}

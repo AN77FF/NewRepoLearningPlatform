@@ -1,9 +1,12 @@
+using LearningPlatformTast.Common.Profiles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Platform_Learning_Test.Data.Context.Factory;
 using Platform_Learning_Test.Data.Factory;
+using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Domain.Entities;
+using Platform_Learning_Test.Service.Service;
 using Platform_Learning_Test.Services.Stores;
 using UserStore = Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserStore;
 
@@ -26,6 +29,14 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
             errorNumbersToAdd: null);
     }));
 builder.Services.AddScoped<IApplicationContextFactory, ApplicationContextFactory>();
+builder.Services.AddScoped<ITestService, TestService>();
+builder.Services.AddScoped<ITestResultService, TestResultService>();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
+builder.Services.AddScoped<IAnswerService, AnswerService>();
+builder.Services.AddScoped<ITestReviewService, TestReviewService>();
+builder.Services.AddScoped<ITestResultService, TestResultService>();
+
+
 
 builder.Services.AddIdentity<User, Role>(options =>
 {
@@ -60,6 +71,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddControllersWithViews();
 
 
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+builder.Services.AddRazorPages();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -83,6 +103,13 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
+
+app.MapControllerRoute(
+    name: "tests",
+    pattern: "Tests",
+    defaults: new { controller = "Tests", action = "Index" });
 
 
 using (var scope = app.Services.CreateScope())
@@ -140,6 +167,8 @@ using (var scope = app.Services.CreateScope())
         var logger = services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Ошибка при инициализации базы данных");
     }
+
+    
 }
 
 app.Run();
