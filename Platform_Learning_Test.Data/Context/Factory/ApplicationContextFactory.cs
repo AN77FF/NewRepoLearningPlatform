@@ -41,7 +41,10 @@ namespace Platform_Learning_Test.Data.Context.Factory
                 _logger.LogDebug("Creating new ApplicationContext instance (async)");
                 var context = new ApplicationContext(_options);
 
-                await context.Database.CanConnectAsync(ct);
+                if (!await context.Database.CanConnectAsync(ct))
+                {
+                    throw new Exception("Database connection failed");
+                }
 
                 return context;
             }

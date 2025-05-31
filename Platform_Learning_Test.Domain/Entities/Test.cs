@@ -28,7 +28,12 @@ namespace Platform_Learning_Test.Domain.Entities
         [MaxLength(100)]
         public string Category { get; set; }
 
+        [Required]
+        public TimeSpan Duration { get; set; } 
+
+        public string? ImageUrl { get; set; } 
         public ICollection<Question> Questions { get; set; } = new List<Question>();
+        public bool IsFeatured { get; set; }
     }
 
     public enum TestDifficulty

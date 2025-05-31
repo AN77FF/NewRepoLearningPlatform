@@ -55,6 +55,15 @@ namespace Platform_Learning_Test.Service.Service
             await _context.SaveChangesAsync();
             return _mapper.Map<TestDto>(test);
         }
+        public async Task<IEnumerable<TestDto>> GetFeaturedTestsAsync()
+        {
+            return await _context.Tests
+                .Where(t => t.IsFeatured)
+                .OrderByDescending(t => t.CreatedAt)
+                .Take(4)
+                .Select(t => _mapper.Map<TestDto>(t))
+                .ToListAsync();
+        }
 
         public async Task UpdateTestAsync(UpdateTestDto dto)
         {
@@ -74,5 +83,6 @@ namespace Platform_Learning_Test.Service.Service
             _context.Tests.Remove(test);
             await _context.SaveChangesAsync();
         }
+        
     }
 }

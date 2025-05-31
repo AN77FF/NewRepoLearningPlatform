@@ -6,6 +6,7 @@ using Platform_Learning_Test.Service.Service;
 
 namespace Platform_Learning_Test.Controllers
 {
+    [Authorize]
     public class TestTakingController : Controller
     {
         private readonly ITestService _testService;

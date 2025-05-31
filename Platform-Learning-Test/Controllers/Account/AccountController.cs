@@ -63,11 +63,13 @@ namespace Platform_Learning_Test.Controllers.Account
                 return View(model);
             }
 
+
+
             var user = new User
             {
-                UserName = model.UserName,
-                Email = model.Email,
-                Name = model.Name,
+                UserName = model.UserName.Trim(),
+                Email = model.Email.Trim(),
+                Name = model.Name.Trim(),
                 NormalizedEmail = normalizedEmail,
                 NormalizedUserName = normalizedUserName
             };

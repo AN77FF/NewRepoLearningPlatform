@@ -7,12 +7,12 @@ namespace Platform_Learning_Test.Models.Account
         [Required(ErrorMessage = "Логин обязателен")]
         [StringLength(256, MinimumLength = 3, ErrorMessage = "Логин должен быть от 3 до 256 символов")]
         [RegularExpression(@"^[a-zA-Z0-9_-]+$", ErrorMessage = "Только латинские буквы, цифры, _ и -")]
-        public string UserName { get; set; } 
+        public string UserName { get; set; } = null!;
 
         [Required(ErrorMessage = "Email обязателен")]
         [EmailAddress(ErrorMessage = "Некорректный email")]
         [StringLength(256, ErrorMessage = "Email не должен превышать 256 символов")]
-        public string Email { get; set; } 
+        public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Имя обязательно")]
         [StringLength(100, MinimumLength = 3, ErrorMessage = "Имя должно быть от 3 до 100 символов")]

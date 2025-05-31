@@ -5,7 +5,7 @@ using Platform_Learning_Test.Service.Service;
 
 namespace Platform_Learning_Test.Controllers
 {
-    
+    [Authorize]
     public class TestResultsController : Controller
     {
         private readonly ITestResultService _testResultService;

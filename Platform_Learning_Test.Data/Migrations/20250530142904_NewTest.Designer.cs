@@ -12,8 +12,8 @@ using Platform_Learning_Test.Data.Factory;
 namespace Platform_Learning_Test.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20250524182320_ListReg")]
-    partial class ListReg
+    [Migration("20250530142904_NewTest")]
+    partial class NewTest
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,6 +256,15 @@ namespace Platform_Learning_Test.Data.Migrations
                     b.Property<string>("Difficulty")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("Duration")
+                        .HasColumnType("time");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .IsRequired()

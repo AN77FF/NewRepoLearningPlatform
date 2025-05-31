@@ -6,7 +6,7 @@ using Platform_Learning_Test.Domain.Dto;
 
 namespace Platform_Learning_Test.Controllers
 {
-    
+    [Authorize]
     public class TestReviewsController : Controller
     {
         private readonly ITestReviewService _reviewService;

@@ -12,9 +12,11 @@ namespace Platform_Learning_Test.Service.Service
         Task<TestDetailDto> GetTestWithDetailsAsync(int id);
         Task<IEnumerable<TestDto>> GetAllTestsAsync();
         Task<TestDto> CreateTestAsync(CreateTestDto dto);
+        Task<IEnumerable<TestDto>> GetFeaturedTestsAsync();
         Task UpdateTestAsync(UpdateTestDto dto);
         Task DeleteTestAsync(int id);
         
+
 
     }
 

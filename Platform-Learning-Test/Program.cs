@@ -136,6 +136,35 @@ using (var scope = app.Services.CreateScope())
                 });
             }
         }
+        
+        if (!context.Tests.Any())
+        {
+            context.Tests.AddRange(
+                new Test
+                {
+                    Title = "Основы Python",
+                    Description = "Изучите основы программирования на Python",
+                    Category = "Программирование",
+                    Duration = TimeSpan.FromHours(12),
+                    ImageUrl = "https://placehold.co/600x400/4CAF50/FFFFFF?text=Python",
+                    CreatedAt = DateTime.UtcNow,
+                    IsFeatured = true
+                },
+                new Test
+                {
+                    Title = "Английский для начинающих",
+                    Description = "Курс для тех, кто только начинает изучать английский",
+                    Category = "Языки",
+                    Duration = TimeSpan.FromHours(20),
+                    ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=English",
+                    CreatedAt = DateTime.UtcNow,
+                    IsFeatured = true
+                }
+           
+            );
+
+            await context.SaveChangesAsync();
+        }
 
         // тест-администратора(позже....)
         if (app.Environment.IsDevelopment())
@@ -162,6 +191,8 @@ using (var scope = app.Services.CreateScope())
             }
         }
     }
+
+
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Platform_Learning_Test.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ListReg : Migration
+    public partial class NewTest : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -393,7 +393,10 @@ namespace Platform_Learning_Test.Data.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Difficulty = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Category = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Duration = table.Column<TimeSpan>(type: "time", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsFeatured = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

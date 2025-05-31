@@ -14,5 +14,7 @@ namespace Platform_Learning_Test.Domain.Dto
         public string Difficulty { get; set; }
         public string Category { get; set; }
         public DateTime CreatedAt { get; set; }
+        public TimeSpan Duration { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }

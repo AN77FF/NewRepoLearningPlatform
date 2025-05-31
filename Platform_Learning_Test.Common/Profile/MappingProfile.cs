@@ -11,7 +11,9 @@ namespace LearningPlatformTast.Common.Profiles
             CreateMap<User, UserResponseDto>();
             CreateMap<Role, RoleDto>();
 
-            CreateMap<Test, TestDto>();
+            CreateMap<Test, TestDto>()
+                .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration))
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl));
             CreateMap<Test, TestDetailDto>();
             CreateMap<CreateTestDto, Test>();
             CreateMap<UpdateTestDto, Test>();
