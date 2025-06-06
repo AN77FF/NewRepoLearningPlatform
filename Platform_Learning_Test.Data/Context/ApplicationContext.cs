@@ -4,13 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace Platform_Learning_Test.Data.Factory
+namespace Platform_Learning_Test.Data.Context
 {
-    public class ApplicationContext : IdentityDbContext<User, Role, int>
+    public class ApplicationContext : IdentityDbContext<User, Role, int, IdentityUserClaim<int>,
+    UserRole, 
+    IdentityUserLogin<int>,
+    IdentityRoleClaim<int>,
+    IdentityUserToken<int>>
     {
-        public DbSet<User> Users { get; set; }
-        public DbSet<Role> Roles { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
+
         public DbSet<Test> Tests { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<AnswerOption> AnswerOptions { get; set; }
@@ -20,15 +22,13 @@ namespace Platform_Learning_Test.Data.Factory
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options) { }
-        public ApplicationContext() : base()
-        {
-        }
+        public ApplicationContext() : base() { }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
                 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
-                    ?? "Server=(localdb)\\mssqllocaldb;Database=Platform_Learning_Test;Trusted_Connection=True;TrustServerCertificate=True;";
+                    ?? "Server=Angelica-Val;Database=PlatformLearningTestDB;Trusted_Connection=True;TrustServerCertificate=True;";
 
                 optionsBuilder.UseSqlServer(connectionString);
             }
@@ -37,114 +37,52 @@ namespace Platform_Learning_Test.Data.Factory
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            ConfigureTestSystemEntities(builder);
-           
+            
 
             builder.Entity<User>(entity =>
             {
+                entity.ToTable("Users");
 
-                entity.HasIndex(u => u.NormalizedEmail)
-                    .IsUnique()
-                    .HasDatabaseName("IX_Users_NormalizedEmail")
-                    .HasFilter(null);
-
-                entity.HasIndex(u => u.NormalizedUserName)
-                    .IsUnique()
-                    .HasDatabaseName("IX_Users_NormalizedUserName")
-                    .HasFilter(null);
-
-                entity.Property(u => u.Email)
-                    .IsRequired()
-                    .HasMaxLength(256);
-
-                entity.Property(u => u.NormalizedEmail)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasComputedColumnSql("UPPER([Email])", stored: true);
-
-                entity.Property(u => u.UserName)
-                    .IsRequired()
-                    .HasMaxLength(256);
-
-                entity.Property(u => u.NormalizedUserName)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasComputedColumnSql("UPPER([UserName])", stored: true);
-
-                entity.Property(u => u.Name)
-                    .IsRequired()
-                    .HasMaxLength(100);
-
-                entity.Property(u => u.PasswordHash)
-                    .IsRequired();
-
-                entity.Property(u => u.CreatedAt)
-                    .HasDefaultValueSql("GETUTCDATE()");
-
-                entity.HasMany(u => u.UserRoles)
-                    .WithOne(ur => ur.User)
-                    .HasForeignKey(ur => ur.UserId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<Role>(entity =>
             {
-
-                entity.HasIndex(r => r.NormalizedName)
-                    .IsUnique()
-                    .HasDatabaseName("IX_Roles_NormalizedName")
-                    .HasFilter(null);
-
-                entity.Property(r => r.Name)
-                    .IsRequired()
-                    .HasMaxLength(256);
-
-                entity.Property(r => r.NormalizedName)
-                    .IsRequired()
-                    .HasMaxLength(256)
-                    .HasComputedColumnSql("UPPER([Name])", stored: true);
-
-                entity.Property(r => r.Description)
-                    .HasMaxLength(200)
-                    .HasDefaultValue(string.Empty);
-
-                entity.HasMany(r => r.UserRoles)
-                    .WithOne(ur => ur.Role)
-                    .HasForeignKey(ur => ur.RoleId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                entity.ToTable("Roles");
+                    
             });
-
             builder.Entity<UserRole>(entity =>
             {
+                entity.ToTable("UserRoles");
                 entity.HasKey(ur => new { ur.UserId, ur.RoleId });
-
                 entity.HasOne(ur => ur.User)
-                    .WithMany(u => u.UserRoles)
-                    .HasForeignKey(ur => ur.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
+                      .WithMany(u => u.UserRoles)
+                      .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(ur => ur.Role)
-                    .WithMany(r => r.UserRoles)
-                    .HasForeignKey(ur => ur.RoleId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                      .WithMany(r => r.UserRoles)
+                      .HasForeignKey(ur => ur.RoleId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
+
+            ConfigureTestSystemEntities(builder);
         }
-             private void ConfigureTestSystemEntities(ModelBuilder builder)
-        {
+
+
+            private void ConfigureTestSystemEntities(ModelBuilder builder)
+            {
+           
             builder.Entity<Test>(entity =>
             {
-                entity.ToTable("Tests"); 
+                entity.ToTable("Tests");
                 entity.HasKey(t => t.Id);
                 entity.Property(t => t.Title).IsRequired().HasMaxLength(200);
                 entity.Property(t => t.Description).HasMaxLength(1000);
                 entity.Property(t => t.Category).HasMaxLength(100);
                 entity.Property(t => t.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-                
+
                 entity.Property(t => t.Difficulty)
-               .HasConversion<string>(); 
+               .HasConversion<string>();
 
                 entity.HasMany(t => t.Questions)
                     .WithOne(q => q.Test)
@@ -182,8 +120,27 @@ namespace Platform_Learning_Test.Data.Factory
                 entity.Property(r => r.Text).IsRequired().HasMaxLength(2000);
                 entity.Property(r => r.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             });
-        }
+            builder.Entity<UserAnswer>(entity =>
+            {
+               
+                entity.HasOne(a => a.UserTestHistory)
+                    .WithMany(h => h.UserAnswers)
+                    .HasForeignKey(a => a.UserTestHistoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-        
-    }
-}
+                entity.HasOne(a => a.Question)
+                    .WithMany(q => q.UserAnswers)
+                    .HasForeignKey(a => a.QuestionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+
+                    entity.HasOne(a => a.AnswerOption)
+                        .WithMany(a => a.UserAnswers)
+                        .HasForeignKey(a => a.AnswerOptionId)
+                        .OnDelete(DeleteBehavior.Restrict);
+                
+            });
+        }
+    } }
+
+  

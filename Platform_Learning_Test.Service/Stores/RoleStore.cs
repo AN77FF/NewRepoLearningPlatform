@@ -2,10 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Platform_Learning_Test.Data.Context.Factory;
-using Platform_Learning_Test.Data.Factory;
 using Platform_Learning_Test.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Platform_Learning_Test.Data.Context;
 
 namespace Platform_Learning_Test.Services.Stores
 {

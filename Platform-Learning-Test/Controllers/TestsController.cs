@@ -20,142 +20,100 @@ namespace Platform_Learning_Test.Controllers
             _logger = logger;
         }
 
-       
-        [HttpGet]
+
         public async Task<IActionResult> Index(string category = null)
         {
             var tests = await _testService.GetAllTestsAsync();
+            var categories = tests.Select(t => t.Category).Distinct().OrderBy(c => c);
 
-            var categories = tests
-                .Select(t => t.Category)
-                .Distinct()
-                .OrderBy(c => c);
-
-            var vm = new TestCategoryViewModel
+            return View(new TestCategoryViewModel
             {
                 Categories = categories.ToList(),
-                Tests = category == null
-                    ? tests
-                    : tests.Where(t => t.Category == category)
-            };
-
-            return View(vm);
+                Tests = category == null ? tests : tests.Where(t => t.Category == category)
+            });
         }
 
-        [HttpGet]
         [Authorize(Roles = "Admin,Teacher")]
+        [HttpGet("Create")]
         public IActionResult Create()
         {
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Teacher")]
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateTestDto testDto)
         {
-            if (!ModelState.IsValid)
-                return View(testDto);
+            if (!ModelState.IsValid) return View(testDto);
 
-            try
-            {
-                await _testService.CreateTestAsync(testDto);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating test");
-                ModelState.AddModelError("", "Error creating test");
-                return View(testDto);
-            }
+            await _testService.CreateTestAsync(testDto);
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
+
+        [HttpGet("{id}")]
         public async Task<IActionResult> Details(int id)
         {
             try
             {
                 var test = await _testService.GetTestWithDetailsAsync(id);
-                if (test == null)
-                    return NotFound();
-
                 return View(test);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex, $"Error getting test with id {id}");
                 return NotFound();
             }
         }
 
-        [HttpGet]
         [Authorize(Roles = "Admin,Teacher")]
+        [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
                 var test = await _testService.GetTestWithDetailsAsync(id);
-                if (test == null)
-                    return NotFound();
-
-                var updateDto = new UpdateTestDto
+                return View(new UpdateTestDto
                 {
                     Id = test.Id,
                     Title = test.Title,
                     Description = test.Description,
                     Difficulty = test.Difficulty,
                     Category = test.Category
-                };
-
-                return View(updateDto);
+                });
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex, $"Error getting test for edit with id {id}");
                 return NotFound();
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,Teacher")]
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, UpdateTestDto testDto)
         {
-            if (id != testDto.Id)
-                return NotFound();
+            if (id != testDto.Id) return NotFound();
 
-            if (!ModelState.IsValid)
-                return View(testDto);
+            if (!ModelState.IsValid) return View(testDto);
 
-            try
-            {
-                await _testService.UpdateTestAsync(testDto);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error updating test with id {id}");
-                ModelState.AddModelError("", "Error updating test");
-                return View(testDto);
-            }
+            await _testService.UpdateTestAsync(testDto);
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
         [Authorize(Roles = "Admin")]
+        [HttpPost("Delete/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                var test = await _testService.GetTestWithDetailsAsync(id);
-                if (test == null)
-                    return NotFound();
-
-                return View(test);
+                await _testService.DeleteTestAsync(id);
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex, $"Error getting test for delete with id {id}");
-                return NotFound();
+                return View("Error");
             }
         }
 

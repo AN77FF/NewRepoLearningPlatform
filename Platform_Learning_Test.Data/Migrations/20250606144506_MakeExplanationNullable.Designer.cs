@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Platform_Learning_Test.Data.Factory;
+using Platform_Learning_Test.Data.Context;
 
 #nullable disable
 
 namespace Platform_Learning_Test.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20250530142904_NewTest")]
-    partial class NewTest
+    [Migration("20250606144506_MakeExplanationNullable")]
+    partial class MakeExplanationNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -92,21 +92,6 @@ namespace Platform_Learning_Test.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AspNetUserLogins", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
@@ -204,30 +189,25 @@ namespace Platform_Learning_Test.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasDefaultValue("");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedName")
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasComputedColumnSql("UPPER([Name])", true);
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("IX_Roles_NormalizedName");
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
 
-                    b.ToTable("AspNetRoles", (string)null);
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.Test", b =>
@@ -249,7 +229,6 @@ namespace Platform_Learning_Test.Data.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -323,22 +302,31 @@ namespace Platform_Learning_Test.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("AvatarUrl")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -352,21 +340,14 @@ namespace Platform_Learning_Test.Data.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("NormalizedEmail")
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasComputedColumnSql("UPPER([Email])", true);
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasComputedColumnSql("UPPER([UserName])", true);
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
@@ -382,21 +363,20 @@ namespace Platform_Learning_Test.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Users_NormalizedEmail");
+                        .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
-                        .HasDatabaseName("IX_Users_NormalizedUserName");
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.UserAnswer", b =>
@@ -442,7 +422,7 @@ namespace Platform_Learning_Test.Data.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.UserTestHistory", b =>
@@ -509,21 +489,6 @@ namespace Platform_Learning_Test.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
-                {
-                    b.HasOne("Platform_Learning_Test.Domain.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Platform_Learning_Test.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
                     b.HasOne("Platform_Learning_Test.Domain.Entities.User", null)
@@ -577,15 +542,15 @@ namespace Platform_Learning_Test.Data.Migrations
             modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.UserAnswer", b =>
                 {
                     b.HasOne("Platform_Learning_Test.Domain.Entities.AnswerOption", "AnswerOption")
-                        .WithMany()
+                        .WithMany("UserAnswers")
                         .HasForeignKey("AnswerOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Platform_Learning_Test.Domain.Entities.Question", "Question")
-                        .WithMany()
+                        .WithMany("UserAnswers")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Platform_Learning_Test.Domain.Entities.UserTestHistory", "UserTestHistory")
@@ -639,9 +604,16 @@ namespace Platform_Learning_Test.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.AnswerOption", b =>
+                {
+                    b.Navigation("UserAnswers");
+                });
+
             modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.Question", b =>
                 {
                     b.Navigation("AnswerOptions");
+
+                    b.Navigation("UserAnswers");
                 });
 
             modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.Role", b =>

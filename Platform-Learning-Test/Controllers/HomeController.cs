@@ -19,9 +19,9 @@ namespace Platform_Learning_Test.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View();
-            //var featuredTests = await _testService.GetFeaturedTestsAsync();
-            //return View(featuredTests);
+            
+            var featuredTests = await _testService.GetFeaturedTestsAsync();
+            return View(featuredTests);
         }
 
         public IActionResult Privacy()

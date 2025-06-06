@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Platform_Learning_Test.Data.Factory;
+using Platform_Learning_Test.Data.Context;
 using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Domain.Entities;
 

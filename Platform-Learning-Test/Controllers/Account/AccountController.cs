@@ -9,12 +9,14 @@ using Platform_Learning_Test.Service.Service;
 
 namespace Platform_Learning_Test.Controllers.Account
 {
+    [Route("Account")]
     public class AccountController : Controller
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<Role> _roleManager;
         private readonly ILogger<AccountController> _logger;
+        private readonly IProfileService _profileService;
         private readonly ITestResultService _testResultService;
 
         public AccountController(
@@ -22,66 +24,46 @@ namespace Platform_Learning_Test.Controllers.Account
             SignInManager<User> signInManager,
             RoleManager<Role> roleManager,
             ILogger<AccountController> logger,
+            IProfileService profileService,
             ITestResultService testResultService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _logger = logger;
+            _profileService = profileService;
             _testResultService = testResultService;
         }
 
-        [HttpGet]
+        [HttpGet("Register")]
+       
         public IActionResult Register()
         {
             return View();
         }
 
-        [HttpPost]
+        [HttpPost("Register")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterAsync(RegisterModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var normalizedEmail = model.Email.ToUpperInvariant();
-            var existingUser = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
-
-            if (existingUser != null)
-            {
-                ModelState.AddModelError(string.Empty, "User with this email already exists");
-                return View(model);
-            }
-
-            var normalizedUserName = model.UserName.ToUpperInvariant();
-            existingUser = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.NormalizedUserName == normalizedUserName);
-
-            if (existingUser != null)
-            {
-                ModelState.AddModelError(string.Empty, "User with this username already exists");
-                return View(model);
-            }
-
-
+            if (!ModelState.IsValid) return View(model);
 
             var user = new User
             {
-                UserName = model.UserName.Trim(),
-                Email = model.Email.Trim(),
-                Name = model.Name.Trim(),
-                NormalizedEmail = normalizedEmail,
-                NormalizedUserName = normalizedUserName
+                UserName = model.Email,
+                Email = model.Email,
+                Name = model.Name,
+                NormalizedEmail = model.Email.ToUpperInvariant(),
+                NormalizedUserName = model.Email.ToUpperInvariant()
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User created a new account with email: {Email}", user.Email);
-
+                await _userManager.AddToRoleAsync(user, "User");
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Profile");
             }
 
             foreach (var error in result.Errors)
@@ -92,42 +74,33 @@ namespace Platform_Learning_Test.Controllers.Account
             return View(model);
         }
 
-        [HttpGet]
+
+        [HttpGet("Login")]
         public IActionResult Login()
         {
             return View();
         }
 
-        [HttpPost]
+        [HttpPost("Login")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LoginAsync(LoginModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var normalizedEmail = model.Email.ToUpperInvariant();
-            var user = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.NormalizedEmail == normalizedEmail);
-
-            if (user == null)
-            {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt");
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
             var result = await _signInManager.PasswordSignInAsync(
-                user.UserName, model.Password, model.RememberMe, lockoutOnFailure: false);
+                model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User logged in: {Email}", model.Email);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Profile");
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt");
             return View(model);
         }
 
-        [HttpPost]
+        [HttpPost("Logout")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LogoutAsync()
         {
             await _signInManager.SignOutAsync();
@@ -174,21 +147,19 @@ namespace Platform_Learning_Test.Controllers.Account
         {
             return View();
         }
+        //[Authorize]
+        //[HttpGet("Profile")]
+        //public async Task<IActionResult> Profile()
+        //{
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //    var user = await _userManager.GetUserAsync(User);
+        //    var results = await _testResultService.GetUserResultsAsync(int.Parse(userId));
 
-        [Authorize]
-        public async Task<IActionResult> Profile()
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var user = await _userManager.GetUserAsync(User);
-            var results = await _testResultService.GetUserResultsAsync(userId);
-
-            var model = new ProfileModel
-            {
-                User = user,
-                TestResults = results
-            };
-
-            return View(model);
-        }
+        //    return View(new ProfileModel
+        //    {
+        //        User = user,
+        //        TestResults = results
+        //    });
+        //}
     }
 }

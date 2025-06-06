@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Platform_Learning_Test.Data.Context.Factory;
-using Platform_Learning_Test.Data.Factory;
+using Platform_Learning_Test.Data.Context;
 
 namespace Platform_Learning_Test.Services.Stores
 {
@@ -258,11 +258,12 @@ namespace Platform_Learning_Test.Services.Stores
         {
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
-
-            return await _context.UserRoles
-                .AnyAsync(ur => ur.UserId == user.Id &&
-                               ur.Role.NormalizedName == roleName.ToUpperInvariant(),
-                    cancellationToken);
+            return await (
+                            from userRole in _context.UserRoles
+                            join role in _context.Roles on userRole.RoleId equals role.Id
+                            where userRole.UserId == user.Id && role.NormalizedName == roleName.ToUpperInvariant()
+                            select 1
+                        ).AnyAsync(cancellationToken);
         }
 
         public async Task<IList<User>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
@@ -270,10 +271,13 @@ namespace Platform_Learning_Test.Services.Stores
             ThrowIfDisposed();
             cancellationToken.ThrowIfCancellationRequested();
 
-            return await _context.UserRoles
-                .Where(ur => ur.Role.NormalizedName == roleName.ToUpperInvariant())
-                .Select(ur => ur.User)
-                .ToListAsync(cancellationToken);
+            return await (
+               from role in _context.Roles
+               join userRole in _context.UserRoles on role.Id equals userRole.RoleId
+               join user in _context.Users on userRole.UserId equals user.Id
+               where role.NormalizedName == roleName.ToUpperInvariant()
+               select user
+           ).ToListAsync(cancellationToken);
         }
 
         public void Dispose()

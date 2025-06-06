@@ -5,7 +5,7 @@ namespace Platform_Learning_Test.Models.Account
 {
     public class ProfileModel
     {
-        public User User { get; set; }
+        public UserProfileDto Profile { get; set; }
         public IEnumerable<TestResultDto> TestResults { get; set; }
     }
 

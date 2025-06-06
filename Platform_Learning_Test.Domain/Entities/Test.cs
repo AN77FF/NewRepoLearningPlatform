@@ -13,10 +13,10 @@ namespace Platform_Learning_Test.Domain.Entities
 
         [Required]
         [MaxLength(200)]
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         [MaxLength(1000)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
@@ -26,7 +26,7 @@ namespace Platform_Learning_Test.Domain.Entities
 
         [Required]
         [MaxLength(100)]
-        public string Category { get; set; }
+        public string? Category { get; set; }
 
         [Required]
         public TimeSpan Duration { get; set; } 

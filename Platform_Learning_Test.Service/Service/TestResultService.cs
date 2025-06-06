@@ -8,7 +8,7 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Platform_Learning_Test.Data.Factory;
+using Platform_Learning_Test.Data.Context;
 using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Domain.Entities;
 using SendGrid.Helpers.Errors.Model;

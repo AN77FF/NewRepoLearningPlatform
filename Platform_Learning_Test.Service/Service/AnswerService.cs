@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Platform_Learning_Test.Data.Factory;
+using Platform_Learning_Test.Data.Context;
+
 using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Domain.Entities;
 using SendGrid.Helpers.Errors.Model;
@@ -47,13 +48,11 @@ namespace Platform_Learning_Test.Service.Service
 
         public async Task<IEnumerable<AnswerOptionDto>> GetAnswersForQuestionAsync(int questionId)
         {
-            var answers = await _context.AnswerOptions
+            return await _context.AnswerOptions
                 .AsNoTracking()
                 .Where(a => a.QuestionId == questionId)
-                .OrderBy(a => a.Id)
+                .Select(a => _mapper.Map<AnswerOptionDto>(a))
                 .ToListAsync();
-
-            return _mapper.Map<IEnumerable<AnswerOptionDto>>(answers);
         }
 
         public async Task<AnswerOptionDto> CreateAnswerAsync(CreateAnswerOptionDto dto)
@@ -64,12 +63,8 @@ namespace Platform_Learning_Test.Service.Service
             }
 
             var answer = _mapper.Map<AnswerOption>(dto);
-
             await _context.AnswerOptions.AddAsync(answer);
             await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Created new answer with id {AnswerId} for question {QuestionId}",
-                answer.Id, answer.QuestionId);
 
             return _mapper.Map<AnswerOptionDto>(answer);
         }
@@ -77,44 +72,28 @@ namespace Platform_Learning_Test.Service.Service
         public async Task UpdateAnswerAsync(UpdateAnswerOptionDto dto)
         {
             var answer = await _context.AnswerOptions.FindAsync(dto.Id);
-            if (answer == null)
-            {
-                _logger.LogWarning("Answer with id {AnswerId} not found for update", dto.Id);
-                throw new NotFoundException($"Answer with id {dto.Id} not found");
-            }
+            if (answer == null) throw new Exception($"Answer with id {dto.Id} not found");
 
             _mapper.Map(dto, answer);
             await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Updated answer with id {AnswerId}", answer.Id);
         }
 
         public async Task DeleteAnswerAsync(int id)
         {
             var answer = await _context.AnswerOptions.FindAsync(id);
-            if (answer == null)
-            {
-                _logger.LogWarning("Answer with id {AnswerId} not found for deletion", id);
-                throw new NotFoundException($"Answer with id {id} not found");
-            }
+            if (answer == null) throw new Exception($"Answer with id {id} not found");
 
             _context.AnswerOptions.Remove(answer);
             await _context.SaveChangesAsync();
-            _logger.LogInformation("Deleted answer with id {AnswerId}", id);
         }
 
         public async Task<bool> IsAnswerCorrectAsync(int answerId)
         {
             var answer = await _context.AnswerOptions
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.Id == answerId);
+               .AsNoTracking()
+               .FirstOrDefaultAsync(a => a.Id == answerId);
 
-            if (answer == null)
-            {
-                throw new NotFoundException($"Answer with id {answerId} not found");
-            }
-
-            return answer.IsCorrect;
+            return answer?.IsCorrect ?? false;
         }
     }
 }

@@ -20,6 +20,7 @@ namespace Platform_Learning_Test.Domain.Entities
         public Test Test { get; set; }
 
         public ICollection<AnswerOption> AnswerOptions { get; set; } = new List<AnswerOption>();
+        public ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
 
         public QuestionDifficulty Difficulty { get; set; } = QuestionDifficulty.Medium;
 

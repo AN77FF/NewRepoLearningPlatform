@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Platform_Learning_Test.Data.Context.Factory;
-using Platform_Learning_Test.Data.Factory;
+using Platform_Learning_Test.Data.Context;
 using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Domain.Entities;
 using Platform_Learning_Test.Service.Service;
 using Platform_Learning_Test.Services.Stores;
 using UserStore = Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserStore;
+using SendGrid.Helpers.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +35,7 @@ builder.Services.AddScoped<ITestResultService, TestResultService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IAnswerService, AnswerService>();
 builder.Services.AddScoped<ITestReviewService, TestReviewService>();
-builder.Services.AddScoped<ITestResultService, TestResultService>();
-
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
 
 builder.Services.AddIdentity<User, Role>(options =>
@@ -55,7 +55,7 @@ builder.Services.AddIdentity<User, Role>(options =>
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
 })
-.AddEntityFrameworkStores<ApplicationContext>() 
+.AddEntityFrameworkStores<ApplicationContext>()
 
 .AddDefaultTokenProviders();
 
@@ -70,14 +70,16 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddRazorPages();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-
-builder.Services.AddRazorPages();
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("TeacherOnly", policy => policy.RequireRole("Teacher"));
+    options.AddPolicy("ContentManagers", policy =>
+        policy.RequireRole("Admin", "Teacher"));
 });
 
 var app = builder.Build();
@@ -105,101 +107,134 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 
+app.MapControllerRoute(
+    name: "account",
+    pattern: "Account/{action}/{id?}",
+    defaults: new { controller = "Account" });
 
 app.MapControllerRoute(
-    name: "tests",
-    pattern: "Tests",
-    defaults: new { controller = "Tests", action = "Index" });
+    name: "admin",
+    pattern: "admin/{controller=Dashboard}/{action=Index}/{id?}",
+    defaults: new { area = "Admin" });
+
+app.MapControllerRoute(
+    name: "profile",
+    pattern: "Profile/{action}/{id?}",
+    defaults: new { controller = "Profile" });
+
+app.MapRazorPages();
+
 
 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    try
+    var context = services.GetRequiredService<ApplicationContext>();
+    context.Database.Migrate();
+
+    var roleManager = services.GetRequiredService<RoleManager<Role>>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
+    var signInManager = scope.ServiceProvider.GetRequiredService<SignInManager<User>>();
+
+
+    string[] roleNames = { "Admin", "Teacher", "User" };
+    foreach (var roleName in roleNames)
     {
-        var context = services.GetRequiredService<ApplicationContext>();
-        await context.Database.MigrateAsync();
 
-        var roleManager = services.GetRequiredService<RoleManager<Role>>();
-        var userManager = services.GetRequiredService<UserManager<User>>();
-
-
-        string[] roleNames = { "Admin", "User" };
-        foreach (var roleName in roleNames)
+        var roleExists = await context.Set<Role>()
+    .AnyAsync(r => r.Name == roleName);
+        if (!roleExists)
         {
-            if (!await roleManager.RoleExistsAsync(roleName))
+            await roleManager.CreateAsync(new Role(roleName)
             {
-                await roleManager.CreateAsync(new Role
-                {
-                    Name = roleName,
-                    NormalizedName = roleName.ToUpperInvariant()
-                });
-            }
-        }
-        
-        if (!context.Tests.Any())
-        {
-            context.Tests.AddRange(
-                new Test
-                {
-                    Title = "Основы Python",
-                    Description = "Изучите основы программирования на Python",
-                    Category = "Программирование",
-                    Duration = TimeSpan.FromHours(12),
-                    ImageUrl = "https://placehold.co/600x400/4CAF50/FFFFFF?text=Python",
-                    CreatedAt = DateTime.UtcNow,
-                    IsFeatured = true
-                },
-                new Test
-                {
-                    Title = "Английский для начинающих",
-                    Description = "Курс для тех, кто только начинает изучать английский",
-                    Category = "Языки",
-                    Duration = TimeSpan.FromHours(20),
-                    ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=English",
-                    CreatedAt = DateTime.UtcNow,
-                    IsFeatured = true
-                }
-           
-            );
-
-            await context.SaveChangesAsync();
-        }
-
-        // тест-администратора(позже....)
-        if (app.Environment.IsDevelopment())
-        {
-            const string adminEmail = "admin@example.com";
-            const string adminPassword = "Admin123!";
-
-            if (await userManager.FindByEmailAsync(adminEmail) == null)
-            {
-                var adminUser = new User
-                {
-                    UserName = adminEmail,
-                    Email = adminEmail,
-                    NormalizedEmail = adminEmail.ToUpperInvariant(),
-                    NormalizedUserName = adminEmail.ToUpperInvariant(),
-                    Name = "Administrator"
-                };
-
-                var result = await userManager.CreateAsync(adminUser, adminPassword);
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminUser, "Admin");
-                }
-            }
+                NormalizedName = roleName.ToUpperInvariant(),
+                Description = $"Role for {roleName}"
+            });
         }
     }
 
 
-    catch (Exception ex)
+    var adminEmail = "admin@example.com";
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ошибка при инициализации базы данных");
+        var adminUser = new User
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            NormalizedEmail = adminEmail.ToUpper(),
+            NormalizedUserName = adminEmail.ToUpper(),
+            Name = "Administrator",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var result = await userManager.CreateAsync(adminUser, "Admin123!");
+        if (result.Succeeded)
+        {
+            await userManager.AddToRolesAsync(adminUser, new[] { "Admin", "Teacher" });
+            await signInManager.SignInAsync(adminUser, isPersistent: false);
+        }
+
+    }
+    if (!context.Tests.Any())
+    {
+        var tests = new List<Test>
+        {
+            new Test
+            {
+                Title = "Основы Python",
+                Description = "Изучите основы программирования на Python",
+                Category = "Программирование",
+                Difficulty = TestDifficulty.Medium,
+                Duration = TimeSpan.FromHours(12),
+                ImageUrl = "https://placehold.co/600x400/4CAF50/FFFFFF?text=Python",
+                CreatedAt = DateTime.UtcNow,
+                IsFeatured = true,
+                Questions = new List<Question>
+{
+                new Question
+            {
+                Text = "Что такое список в Python?",
+                Difficulty = QuestionDifficulty.Easy,
+                AnswerOptions = new List<AnswerOption>
+                {
+                new AnswerOption { Text = "Изменяемая коллекция элементов", IsCorrect = true, Explanation = "Это правильный ответ" },
+                new AnswerOption { Text = "Неизменяемая коллекция элементов", IsCorrect = false, Explanation = "Это правильный ответ"  }
+                }
+            }
+}
+            },
+            new Test
+            {
+                Title = "Английский для начинающих",
+                Description = "Курс для тех, кто только начинает изучать английский",
+                Category = "Языки",
+                Difficulty = TestDifficulty.Easy,
+                Duration = TimeSpan.FromHours(20),
+                ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=English",
+                CreatedAt = DateTime.UtcNow,
+                IsFeatured = true,
+                Questions = new List<Question>
+                {
+                    new Question
+                    {
+                        Text = "Как переводится 'apple'?",
+                        Difficulty = QuestionDifficulty.Easy,
+                        AnswerOptions = new List<AnswerOption>
+                        {
+                            new AnswerOption { Text = "Яблоко", IsCorrect = true, Explanation = "Это правильный ответ"  },
+                            new AnswerOption { Text = "Апельсин", IsCorrect = false, Explanation = "Это правильный ответ" }
+                        }
+                    }
+                }
+            }
+        };
+
+        context.Tests.AddRange(tests);
+        await context.SaveChangesAsync();
     }
 
-    
+
+
 }
 
 app.Run();

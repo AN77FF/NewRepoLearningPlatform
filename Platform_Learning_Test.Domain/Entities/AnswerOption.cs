@@ -22,6 +22,7 @@ namespace Platform_Learning_Test.Domain.Entities
 
         [MaxLength(1000)]
         public string Explanation { get; set; }
+        public ICollection<UserAnswer> UserAnswers { get; set; }= new List<UserAnswer>();
     }
 
 }

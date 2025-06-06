@@ -12,31 +12,19 @@ namespace Platform_Learning_Test.Domain.Entities
 
     public class User : IdentityUser<int>
     {
-        public int Id { get; set; }
-
-        [Required]
-        [StringLength(256)]
-        public string UserName { get; set; }
-
-        [Required]
-        [StringLength(256)]
-        public string NormalizedUserName { get; set; }
-
-        [Required]
-        [EmailAddress]
-        [StringLength(256)]
-        public string Email { get; set; }
-
-        [Required]
-        [StringLength(256)]
-        public string NormalizedEmail { get; set; }
-
         [Required]
         [StringLength(100, MinimumLength = 3)]
         public string Name { get; set; }
 
-        [Required]
-        public string PasswordHash { get; set; }
+        [StringLength(500)]
+        public string? Bio { get; set; }
+
+        [StringLength(200)]
+        public string? Location { get; set; }
+
+        [StringLength(300)]
+        public string? AvatarUrl { get; set; }
+      
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
