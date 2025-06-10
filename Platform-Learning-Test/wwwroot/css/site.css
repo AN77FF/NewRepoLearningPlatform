@@ -366,29 +366,100 @@ h2 {
     }
 }
 
-/*.hero-section {
-    background: linear-gradient(rgba(0, 0, 0, 0.7), url('https://placehold.co/1920x600/007bff/ffffff?text=Learning+Platform') no-repeat center center;
-    background-size: cover;
-}*/
-
-/*.category-icon {
-    transition: transform 0.3s;
+.container {
+    max-width: 1200px;
+    padding: 20px;
 }
 
-.category-card:hover .category-icon {
-    transform: scale(1.1);
+
+
+.card-body {
+    padding: 20px;
 }
 
-.card {
-    transition: transform 0.3s, box-shadow 0.3s;
+img.rounded-circle {
+    border: 3px solid #dee2e6;
+    transition: border-color 0.3s;
+}
+
+    img.rounded-circle:hover {
+        border-color: #007bff;
+    }
+
+h4, h5, h6 {
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #343a40;
+}
+
+p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.btn.btn-primary {
+    background-color: #007bff;
     border: none;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+    .btn.btn-primary:hover {
+        background-color: #0069d9;
+        transform: translateY(-1px);
+    }
+
+
+.list-group {
+    margin-top: 15px;
+}
+
+.list-group-item {
+    border: none;
+    border-radius: 6px;
+    background-color: #f1f1f1;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+    .list-group-item:hover {
+        background-color: #e2e2e2;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    
+    .list-group-item h6 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #212529;
+    }
+
+
+small {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+
+.progress {
+    background-color: #e9ecef;
     border-radius: 10px;
+    height: 20px;
     overflow: hidden;
 }
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }*/
+.progress-bar {
+    background-color: #17a2b8;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    transition: width 0.4s ease;
+}
 
-
+    .progress-bar:after {
+        content: attr(style);
+    }

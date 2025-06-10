@@ -9,7 +9,6 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Platform_Learning_Test.Domain.Entities
 {
-
     public class User : IdentityUser<int>
     {
         [Required]
@@ -24,9 +23,14 @@ namespace Platform_Learning_Test.Domain.Entities
 
         [StringLength(300)]
         public string? AvatarUrl { get; set; }
-      
+        [Required]
+        public bool IsActive { get; set; } = true;
 
+        [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? LastLogin { get; set; }
+
 
         public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     }

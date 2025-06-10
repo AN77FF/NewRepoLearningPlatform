@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Platform_Learning_Test.Domain.Entities;
 using Platform_Learning_Test.Models.Account;
 using Platform_Learning_Test.Service.Service;
+using Microsoft.Extensions.Logging;
 
 namespace Platform_Learning_Test.Controllers.Account
 {
@@ -36,7 +37,7 @@ namespace Platform_Learning_Test.Controllers.Account
         }
 
         [HttpGet("Register")]
-       
+
         public IActionResult Register()
         {
             return View();
@@ -46,30 +47,52 @@ namespace Platform_Learning_Test.Controllers.Account
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RegisterAsync(RegisterModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            _logger.LogInformation("Начало регистрации для {Email}", model.Email);
 
-            var user = new User
+            if (!ModelState.IsValid)
             {
-                UserName = model.Email,
-                Email = model.Email,
-                Name = model.Name,
-                NormalizedEmail = model.Email.ToUpperInvariant(),
-                NormalizedUserName = model.Email.ToUpperInvariant()
-            };
-
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "User");
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Index", "Profile");
+                _logger.LogWarning("Модель невалидна для {Email}", model.Email);
+                return View(model);
             }
 
-            foreach (var error in result.Errors)
+            try
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+
+                var user = new User
+                {
+                    UserName = model.UserName,
+                    Email = model.Email,
+                    Name = model.Name,
+                    NormalizedEmail = model.Email.ToUpperInvariant(),
+                    NormalizedUserName = model.UserName.ToUpperInvariant()
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Пользователь {Email} успешно зарегистрирован", model.Email);
+
+                    await _userManager.AddToRoleAsync(user, "User");
+
+                    await _signInManager.SignInAsync(user, isPersistent: false, "Identity.Application");
+
+                    _logger.LogInformation("Перенаправление в профиль");
+
+                    return RedirectToAction("Index", "Home");
+                }
+                _logger.LogError("Ошибки при регистрации: {@Errors}", result.Errors);
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Критическая ошибка при регистрации");
+                ModelState.AddModelError(string.Empty, "Произошла критическая ошибка при регистрации");
+            }
+
 
             return View(model);
         }
@@ -87,16 +110,40 @@ namespace Platform_Learning_Test.Controllers.Account
         {
             if (!ModelState.IsValid) return View(model);
 
-            var result = await _signInManager.PasswordSignInAsync(
-                model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var user = await _userManager.FindByNameAsync(model.UserName);
 
-            if (result.Succeeded)
+            if (user == null)
+
             {
-                return RedirectToAction("Index", "Profile");
+
+                ModelState.AddModelError(string.Empty, "Неверный логин или пароль");
+
+                return View(model);
+
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt");
+            var result = await _signInManager.PasswordSignInAsync(
+
+                model.UserName,
+
+                model.Password,
+
+                model.RememberMe,
+
+                lockoutOnFailure: false);
+
+            if (result.Succeeded)
+
+            {
+
+                return RedirectToAction("Index", "Profile");
+
+            }
+
+            ModelState.AddModelError(string.Empty, "Неверный логин или пароль");
+
             return View(model);
+
         }
 
         [HttpPost("Logout")]
@@ -108,13 +155,14 @@ namespace Platform_Learning_Test.Controllers.Account
             return RedirectToAction("Index", "Home");
         }
 
-        [HttpGet]
+        [HttpGet("ForgotPassword")]
         public IActionResult ForgotPassword()
         {
             return View();
         }
 
-        [HttpPost]
+        [HttpPost("ForgotPassword")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPasswordAsync(ForgotPasswordModel model)
         {
             if (!ModelState.IsValid)
@@ -142,24 +190,11 @@ namespace Platform_Learning_Test.Controllers.Account
             return RedirectToAction("ForgotPasswordConfirmation");
         }
 
-        [HttpGet]
+        [HttpGet("ForgotPasswordConfirmation")]
         public IActionResult ForgotPasswordConfirmation()
         {
             return View();
         }
-        //[Authorize]
-        //[HttpGet("Profile")]
-        //public async Task<IActionResult> Profile()
-        //{
-        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //    var user = await _userManager.GetUserAsync(User);
-        //    var results = await _testResultService.GetUserResultsAsync(int.Parse(userId));
 
-        //    return View(new ProfileModel
-        //    {
-        //        User = user,
-        //        TestResults = results
-        //    });
-        //}
     }
 }

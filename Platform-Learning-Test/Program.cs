@@ -1,4 +1,3 @@
-using LearningPlatformTast.Common.Profiles;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -10,9 +9,9 @@ using Platform_Learning_Test.Service.Service;
 using Platform_Learning_Test.Services.Stores;
 using UserStore = Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserStore;
 using SendGrid.Helpers.Mail;
+using Platform_Learning_Test.Common.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -22,13 +21,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
-    options.UseSqlServer(connectionString, sqlOptions =>
-    {
-        sqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorNumbersToAdd: null);
-    }));
+    options.UseSqlServer(connectionString));
+
 builder.Services.AddScoped<IApplicationContextFactory, ApplicationContextFactory>();
 builder.Services.AddScoped<ITestService, TestService>();
 builder.Services.AddScoped<ITestResultService, TestResultService>();
@@ -37,41 +31,37 @@ builder.Services.AddScoped<IAnswerService, AnswerService>();
 builder.Services.AddScoped<ITestReviewService, TestReviewService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 
-
 builder.Services.AddIdentity<User, Role>(options =>
 {
-
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = true;
     options.Password.RequireLowercase = true;
 
-
-    options.User.RequireUniqueEmail = true;
     options.User.AllowedUserNameCharacters =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
-
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+    options.User.RequireUniqueEmail = true;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.MaxFailedAccessAttempts = 5;
 })
 .AddEntityFrameworkStores<ApplicationContext>()
-
 .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    options.Cookie.Name = "LearningPlatform.Auth";
     options.Cookie.HttpOnly = true;
     options.ExpireTimeSpan = TimeSpan.FromDays(30);
     options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.SlidingExpiration = true;
+    options.ReturnUrlParameter = "returnUrl";
 });
 
 builder.Services.AddControllersWithViews();
-
 builder.Services.AddRazorPages();
-
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
 builder.Services.AddAuthorization(options =>
@@ -84,6 +74,7 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -94,7 +85,7 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -107,52 +98,38 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 
-app.MapControllerRoute(
-    name: "account",
-    pattern: "Account/{action}/{id?}",
-    defaults: new { controller = "Account" });
-
-app.MapControllerRoute(
-    name: "admin",
-    pattern: "admin/{controller=Dashboard}/{action=Index}/{id?}",
-    defaults: new { area = "Admin" });
-
-app.MapControllerRoute(
-    name: "profile",
-    pattern: "Profile/{action}/{id?}",
-    defaults: new { controller = "Profile" });
-
-app.MapRazorPages();
-
-
 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    await InitializeDatabaseAsync(services);
+}
+
+await app.RunAsync();
+
+
+
+async Task InitializeDatabaseAsync(IServiceProvider services)
+{
     var context = services.GetRequiredService<ApplicationContext>();
-    context.Database.Migrate();
+    await context.Database.MigrateAsync();
 
     var roleManager = services.GetRequiredService<RoleManager<Role>>();
     var userManager = services.GetRequiredService<UserManager<User>>();
-    var signInManager = scope.ServiceProvider.GetRequiredService<SignInManager<User>>();
-
 
     string[] roleNames = { "Admin", "Teacher", "User" };
     foreach (var roleName in roleNames)
     {
-
-        var roleExists = await context.Set<Role>()
-    .AnyAsync(r => r.Name == roleName);
-        if (!roleExists)
+        if (!await context.Set<Role>().AnyAsync(r => r.Name == roleName))
         {
-            await roleManager.CreateAsync(new Role(roleName)
+            await roleManager.CreateAsync(new Role
             {
+                Name = roleName,
                 NormalizedName = roleName.ToUpperInvariant(),
                 Description = $"Role for {roleName}"
             });
         }
     }
-
 
     var adminEmail = "admin@example.com";
     if (await userManager.FindByEmailAsync(adminEmail) == null)
@@ -171,11 +148,10 @@ using (var scope = app.Services.CreateScope())
         if (result.Succeeded)
         {
             await userManager.AddToRolesAsync(adminUser, new[] { "Admin", "Teacher" });
-            await signInManager.SignInAsync(adminUser, isPersistent: false);
         }
-
     }
-    if (!context.Tests.Any())
+
+    if (!await context.Tests.AnyAsync())
     {
         var tests = new List<Test>
         {
@@ -190,23 +166,23 @@ using (var scope = app.Services.CreateScope())
                 CreatedAt = DateTime.UtcNow,
                 IsFeatured = true,
                 Questions = new List<Question>
-{
-                new Question
-            {
-                Text = "Что такое список в Python?",
-                Difficulty = QuestionDifficulty.Easy,
-                AnswerOptions = new List<AnswerOption>
                 {
-                new AnswerOption { Text = "Изменяемая коллекция элементов", IsCorrect = true, Explanation = "Это правильный ответ" },
-                new AnswerOption { Text = "Неизменяемая коллекция элементов", IsCorrect = false, Explanation = "Это правильный ответ"  }
+                    new Question
+                    {
+                        Text = "Что такое список в Python?",
+                        Difficulty = QuestionDifficulty.Easy,
+                        AnswerOptions = new List<AnswerOption>
+                        {
+                            new AnswerOption { Text = "Изменяемая коллекция элементов", IsCorrect = true, Explanation = "Это правильный ответ" },
+                            new AnswerOption { Text = "Неизменяемая коллекция элементов", IsCorrect = false, Explanation = "Это не правильный ответ" }
+                        }
+                    }
                 }
-            }
-}
             },
             new Test
             {
                 Title = "Английский для начинающих",
-                Description = "Курс для тех, кто только начинает изучать английский",
+                Description = "Тест для тех, кто только начинает изучать английский",
                 Category = "Языки",
                 Difficulty = TestDifficulty.Easy,
                 Duration = TimeSpan.FromHours(20),
@@ -221,8 +197,56 @@ using (var scope = app.Services.CreateScope())
                         Difficulty = QuestionDifficulty.Easy,
                         AnswerOptions = new List<AnswerOption>
                         {
-                            new AnswerOption { Text = "Яблоко", IsCorrect = true, Explanation = "Это правильный ответ"  },
-                            new AnswerOption { Text = "Апельсин", IsCorrect = false, Explanation = "Это правильный ответ" }
+                            new AnswerOption { Text = "Яблоко", IsCorrect = true, Explanation = "Это правильный ответ" },
+                            new AnswerOption { Text = "Апельсин", IsCorrect = false, Explanation = "Это не правильный ответ" }
+                        }
+                    }
+                }
+            },
+            new Test
+            {
+                Title = "Аналитика данных с нуля",
+                Description = "Начните говорить на языке цифр",
+                Category = "Аналитика данных",
+                Difficulty = TestDifficulty.Medium,
+                Duration = TimeSpan.FromHours(20),
+                ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=English",
+                CreatedAt = DateTime.UtcNow,
+                IsFeatured = true,
+                Questions = new List<Question>
+                {
+                    new Question
+                    {
+                        Text = "На основе каких данных аналитики помогают руководителям принимать решения?",
+                        Difficulty = QuestionDifficulty.Easy,
+                        AnswerOptions = new List<AnswerOption>
+                        {
+                            new AnswerOption { Text = "SQL, Python, ROI, конверсия, CPA итд.", IsCorrect = true, Explanation = "Это правильный ответ" },
+                            new AnswerOption { Text = "Инструменты для работы с графическим интерфейсом", IsCorrect = false, Explanation = "Это не правильный ответ" }
+                        }
+                    }
+                }
+            },
+            new Test
+            {
+                Title = "Дизайн с Figma",
+                Description = "Подкрепи знания о графическом редакторе для создания интерфейсов, интерактивных прототипов и других дизайн-проектов",
+                Category = "Дизайн",
+                Difficulty = TestDifficulty.Easy,
+                Duration = TimeSpan.FromHours(20),
+                ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=English",
+                CreatedAt = DateTime.UtcNow,
+                IsFeatured = true,
+                Questions = new List<Question>
+                {
+                    new Question
+                    {
+                        Text = "Можно ли добавить в Figma анимацию при прокрутке страницы (on scroll)?",
+                        Difficulty = QuestionDifficulty.Easy,
+                        AnswerOptions = new List<AnswerOption>
+                        {
+                            new AnswerOption { Text = "Да, в Figma можно добавить анимацию при прокрутке страницы (on scroll)", IsCorrect = true, Explanation = "Это правильный ответ" },
+                            new AnswerOption { Text = "Нет, Figma не поддерживает эту анимацию", IsCorrect = false, Explanation = "Это не правильный ответ" }
                         }
                     }
                 }
@@ -232,9 +256,4 @@ using (var scope = app.Services.CreateScope())
         context.Tests.AddRange(tests);
         await context.SaveChangesAsync();
     }
-
-
-
 }
-
-app.Run();

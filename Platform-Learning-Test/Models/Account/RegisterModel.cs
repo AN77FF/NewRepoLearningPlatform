@@ -10,7 +10,7 @@ namespace Platform_Learning_Test.Models.Account
         public string UserName { get; set; } = null!;
 
         [Required(ErrorMessage = "Email обязателен")]
-        [EmailAddress(ErrorMessage = "Некорректный email")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
         [StringLength(256, ErrorMessage = "Email не должен превышать 256 символов")]
         public string Email { get; set; } = null!;
 

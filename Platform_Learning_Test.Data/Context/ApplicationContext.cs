@@ -42,6 +42,11 @@ namespace Platform_Learning_Test.Data.Context
             builder.Entity<User>(entity =>
             {
                 entity.ToTable("Users");
+                entity.Property(u => u.IsActive)
+                    .HasDefaultValue(true);
+
+                entity.Property(u => u.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
 
             });
 

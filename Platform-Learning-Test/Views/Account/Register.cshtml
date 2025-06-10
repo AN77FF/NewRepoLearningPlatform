@@ -14,22 +14,19 @@
                 <form asp-action="Register" method="post" id="registerForm">
                     <div asp-validation-summary="All" class="alert alert-danger"></div>
 
-                    <div class="form-group">
-                        <label asp-for="UserName" class="font-weight-bold"></label>
-                        <input asp-for="UserName" class="form-control"
-                               placeholder="Ваш логин" autocomplete="username" />
-                        <span asp-validation-for="UserName" class="text-danger small"></span>
-                        <small class="form-text text-muted">
-                            От 3 до 256 символов (латинские буквы, цифры, _-)
-                        </small>
-                    </div>
+					<div class="form-group">
+						<label asp-for="UserName" class="form-label"></label>
+						<input asp-for="UserName" class="form-control" placeholder="Ваш логин" />
+						<span asp-validation-for="UserName" class="text-danger"></span>
+						<small class="form-text text-muted">
+							От 3 до 256 символов (латинские буквы, цифры, _-)
+						</small>
+					</div>
 
                     <div class="form-group">
-                        <label asp-for="Email" class="font-weight-bold"></label>
-                        <input asp-for="Email" class="form-control"
-                               placeholder="example@email.com"
-                               autocomplete="email" />
-                        <span asp-validation-for="Email" class="text-danger small"></span>
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" placeholder="example@email.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
 
                     <div class="form-group">

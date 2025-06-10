@@ -1,0 +1,58 @@
+﻿@model Platform_Learning_Test.Domain.Entities.AdminDashboardStats
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Admin Dashboard</h2>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <p class="card-text display-4">@Model.TotalUsers</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Tests</h5>
+                    <p class="card-text display-4">@Model.TotalTests</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">New Users (7d)</h5>
+                    <p class="card-text display-4">@Model.NewUsers</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Active Tests</h5>
+                    <p class="card-text display-4">@Model.ActiveTests</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <div class="d-grid gap-2">
+            <a asp-controller="AdminUsers" asp-action="Index" class="btn btn-lg btn-outline-dark">
+                <i class="fas fa-users"></i> Manage Users
+            </a>
+            <a asp-controller="AdminTests" asp-action="Index" class="btn btn-lg btn-outline-dark">
+                <i class="fas fa-tasks"></i> Manage Tests
+            </a>
+        </div>
+    </div>
+</div>

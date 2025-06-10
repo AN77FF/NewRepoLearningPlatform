@@ -8,6 +8,7 @@ using Platform_Learning_Test.Models.Account;
 namespace Platform_Learning_Test.Controllers
 {
     [Authorize]
+    [Route("Profile")]
     public class ProfileController : Controller
     {
         private readonly IProfileService _profileService;
@@ -21,7 +22,8 @@ namespace Platform_Learning_Test.Controllers
             _testResultService = testResultService;
         }
 
-        [HttpGet]
+        [HttpGet("")] 
+        [HttpGet("Index")]
         public async Task<IActionResult> Index()
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

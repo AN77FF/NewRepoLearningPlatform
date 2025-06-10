@@ -7,6 +7,7 @@ using Platform_Learning_Test.Service.Service;
 namespace Platform_Learning_Test.Controllers
 {
     [Authorize]
+    [Route("Tests")]
     public class TestsController : Controller
     {
         private readonly ITestService _testService;
@@ -20,7 +21,7 @@ namespace Platform_Learning_Test.Controllers
             _logger = logger;
         }
 
-
+        [HttpGet("")]
         public async Task<IActionResult> Index(string category = null)
         {
             var tests = await _testService.GetAllTestsAsync();

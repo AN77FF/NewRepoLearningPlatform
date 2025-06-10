@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LearningPlatformTast.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-
-
 </head>
 <body>
     <header>
@@ -26,9 +24,7 @@
                             <a class="nav-link" asp-controller="Tests" asp-action="Index">Тесты</a>
                         </li>
                         @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
-
                         {
-
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
                                     Администрирование
@@ -40,7 +36,11 @@
                             </li>
                         }
                     </ul>
+
+                    <ul class="navbar-nav">
+
                     <partial name="_LoginPartial" />
+                    </ul>
                 </div>
             </div>
         </nav>

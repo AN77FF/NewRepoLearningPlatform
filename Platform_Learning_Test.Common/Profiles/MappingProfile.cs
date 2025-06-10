@@ -2,7 +2,7 @@
 using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Domain.Entities;
 
-namespace LearningPlatformTast.Common.Profiles
+namespace Platform_Learning_Test.Common.Profiles
 {
     public class MappingProfile : Profile
     {
@@ -29,6 +29,8 @@ namespace LearningPlatformTast.Common.Profiles
             CreateMap<UserTestHistory, TestResultDto>();
             CreateMap<UserTestHistory, TestResultDetailsDto>();
             CreateMap<TestReview, TestReviewDto>();
+            CreateMap<User, UserProfileDto>();
+
         }
     }
 
