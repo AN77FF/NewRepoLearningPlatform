@@ -54,6 +54,20 @@ namespace Platform_Learning_Test.Service.Service
                 .Select(a => _mapper.Map<AnswerOptionDto>(a))
                 .ToListAsync();
         }
+        public async Task<IEnumerable<AnswerOptionDto>> GetAllAnswerOptionsAsync()
+        {
+            return await _context.AnswerOptions
+                .Include(a => a.Question) 
+                .Select(a => new AnswerOptionDto
+                {
+                    Id = a.Id,
+                    Text = a.Text,
+                    IsCorrect = a.IsCorrect,
+                    QuestionId = a.QuestionId,
+                    QuestionText = a.Question.Text
+                })
+                .ToListAsync();
+        }
 
         public async Task<AnswerOptionDto> CreateAnswerAsync(CreateAnswerOptionDto dto)
         {

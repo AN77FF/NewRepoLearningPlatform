@@ -6,11 +6,15 @@ using System.Threading.Tasks;
 
 namespace Platform_Learning_Test.Domain.Dto
 {
-    public class TestResultDetailsDto : TestResultDto
+    public class TestResultDetailsDto
     {
+        public int Id { get; set; }
+        public string TestTitle { get; set; }
+        public DateTime CompletedAt { get; set; }
+        public int CorrectAnswers { get; set; }
+        public int TotalQuestions { get; set; }
+        public double ScorePercentage { get; set; }
         public List<QuestionResultDto> QuestionResults { get; set; } = new();
-
-        public TimeSpan TimeSpent { get; set; }
     }
 
 }

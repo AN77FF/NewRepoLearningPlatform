@@ -12,10 +12,14 @@ namespace Platform_Learning_Test.Service.Service
 
         Task<QuestionDto> GetQuestionAsync(int id);
         Task<IEnumerable<QuestionDto>> GetQuestionsForTestAsync(int testId);
+
+        Task<IEnumerable<QuestionDto>> GetAllQuestionsAsync();
         Task<QuestionDto> CreateQuestionAsync(CreateQuestionDto dto);
         Task UpdateQuestionAsync(UpdateQuestionDto dto);
         Task DeleteQuestionAsync(int id);
         Task ValidateQuestionAnswersAsync(int questionId, List<int> selectedAnswerIds);
+
+        
     }
 
 }

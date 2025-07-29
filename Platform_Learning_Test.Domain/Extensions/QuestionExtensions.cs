@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Domain.Entities;
 
@@ -21,7 +19,30 @@ namespace Platform_Learning_Test.Domain.Extensions
                 TestId = question.TestId,
                 Difficulty = question.Difficulty.ToString(),
                 TimeLimitSeconds = question.TimeLimitSeconds,
-                AnswerOptions = question.AnswerOptions?.Select(a => a.ToDto()).ToList()
+                AnswerOptions = question.AnswerOptions?.Select(a =>
+                    new AnswerOptionDto
+                    {
+                        Id = a.Id,
+                        Text = a.Text,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
+            };
+        }
+        public static UpdateQuestionDto ToUpdateDto(this Question question)
+        {
+            return new UpdateQuestionDto
+            {
+                Id = question.Id,
+                Text = question.Text,
+                Difficulty = question.Difficulty.ToString(),
+                TimeLimitSeconds = question.TimeLimitSeconds,
+                TestId = question.TestId,
+                AnswerOptions = question.AnswerOptions.Select(a => new UpdateAnswerOptionDto
+                {
+                    Id = a.Id,
+                    Text = a.Text,
+                    IsCorrect = a.IsCorrect
+                }).ToList()
             };
         }
 
@@ -33,24 +54,15 @@ namespace Platform_Learning_Test.Domain.Extensions
             {
                 Text = dto.Text,
                 TestId = dto.TestId,
-                Difficulty = Enum.Parse<QuestionDifficulty>(dto.Difficulty),
-                TimeLimitSeconds = dto.TimeLimitSeconds,
-                AnswerOptions = dto.AnswerOptions?.Select(a => a.ToEntity()).ToList()
+                Difficulty = QuestionDifficulty.Medium, 
+                TimeLimitSeconds = 60, 
+                AnswerOptions = dto.AnswerOptions.Select(a =>
+                    new AnswerOption
+                    {
+                        Text = a.Text,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
             };
         }
-
-        public static Question ToEntity(this UpdateQuestionDto dto, Question existingQuestion)
-        {
-            if (dto == null || existingQuestion == null)
-                return existingQuestion;
-
-            existingQuestion.Text = dto.Text;
-            existingQuestion.Difficulty = Enum.Parse<QuestionDifficulty>(dto.Difficulty);
-            existingQuestion.TimeLimitSeconds = dto.TimeLimitSeconds;
-
-            return existingQuestion;
-        }
     }
-
-
 }

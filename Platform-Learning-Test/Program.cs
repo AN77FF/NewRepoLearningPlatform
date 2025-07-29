@@ -11,6 +11,9 @@ using UserStore = Microsoft.AspNetCore.Identity.EntityFrameworkCore.UserStore;
 using SendGrid.Helpers.Mail;
 using Platform_Learning_Test.Common.Profiles;
 
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
@@ -30,6 +33,8 @@ builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddScoped<IAnswerService, AnswerService>();
 builder.Services.AddScoped<ITestReviewService, TestReviewService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+
+
 
 builder.Services.AddIdentity<User, Role>(options =>
 {
@@ -58,6 +63,7 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.SlidingExpiration = true;
     options.ReturnUrlParameter = "returnUrl";
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 builder.Services.AddControllersWithViews();
@@ -93,12 +99,18 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "admin",
+        pattern: "Admin/{controller=Dashboard}/{action=Index}/{id?}");
 
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+});
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -117,17 +129,13 @@ async Task InitializeDatabaseAsync(IServiceProvider services)
     var roleManager = services.GetRequiredService<RoleManager<Role>>();
     var userManager = services.GetRequiredService<UserManager<User>>();
 
+
     string[] roleNames = { "Admin", "Teacher", "User" };
     foreach (var roleName in roleNames)
     {
-        if (!await context.Set<Role>().AnyAsync(r => r.Name == roleName))
+        if (!await roleManager.RoleExistsAsync(roleName))
         {
-            await roleManager.CreateAsync(new Role
-            {
-                Name = roleName,
-                NormalizedName = roleName.ToUpperInvariant(),
-                Description = $"Role for {roleName}"
-            });
+            await roleManager.CreateAsync(new Role(roleName));
         }
     }
 
@@ -138,8 +146,6 @@ async Task InitializeDatabaseAsync(IServiceProvider services)
         {
             UserName = adminEmail,
             Email = adminEmail,
-            NormalizedEmail = adminEmail.ToUpper(),
-            NormalizedUserName = adminEmail.ToUpper(),
             Name = "Administrator",
             CreatedAt = DateTime.UtcNow
         };
@@ -151,9 +157,14 @@ async Task InitializeDatabaseAsync(IServiceProvider services)
         }
     }
 
-    if (!await context.Tests.AnyAsync())
-    {
-        var tests = new List<Test>
+    
+
+
+
+if (!await context.Tests.AnyAsync())
+{
+
+    var tests = new List<Test>
         {
             new Test
             {
@@ -210,7 +221,7 @@ async Task InitializeDatabaseAsync(IServiceProvider services)
                 Category = "Аналитика данных",
                 Difficulty = TestDifficulty.Medium,
                 Duration = TimeSpan.FromHours(20),
-                ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=English",
+                ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=Analytics",
                 CreatedAt = DateTime.UtcNow,
                 IsFeatured = true,
                 Questions = new List<Question>
@@ -234,7 +245,7 @@ async Task InitializeDatabaseAsync(IServiceProvider services)
                 Category = "Дизайн",
                 Difficulty = TestDifficulty.Easy,
                 Duration = TimeSpan.FromHours(20),
-                ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=English",
+                ImageUrl = "https://placehold.co/600x400/2196F3/FFFFFF?text=Figma",
                 CreatedAt = DateTime.UtcNow,
                 IsFeatured = true,
                 Questions = new List<Question>
@@ -253,7 +264,12 @@ async Task InitializeDatabaseAsync(IServiceProvider services)
             }
         };
 
-        context.Tests.AddRange(tests);
+
+        foreach (var test in tests)
+        {
+            context.Tests.Add(test);
+        }
         await context.SaveChangesAsync();
     }
+  
 }

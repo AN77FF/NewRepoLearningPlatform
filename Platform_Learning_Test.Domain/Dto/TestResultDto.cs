@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Platform_Learning_Test.Domain.Dto;
 
 namespace Platform_Learning_Test.Domain.Dto
 {
@@ -17,6 +18,9 @@ namespace Platform_Learning_Test.Domain.Dto
         public int CorrectAnswers { get; set; }
         public double ScorePercentage { get; set; }
         public DateTime CompletedAt { get; set; }
+        public int Score { get; set; }
+        public List<QuestionResultDto> Results { get; set; }
+        public DateTime CompletionDate { get; set; }
     }
 
 }

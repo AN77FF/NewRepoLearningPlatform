@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Models;
 using Platform_Learning_Test.Service.Service;
 
@@ -19,9 +20,16 @@ namespace Platform_Learning_Test.Controllers
 
         public async Task<IActionResult> Index()
         {
-            
-            var featuredTests = await _testService.GetFeaturedTestsAsync();
-            return View(featuredTests);
+            try
+            {
+                var featuredTests = await _testService.GetFeaturedTestsAsync();
+                return View(featuredTests);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading featured tests");
+                return View(new List<TestDto>());
+            }
         }
 
         public IActionResult Privacy()

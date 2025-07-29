@@ -14,7 +14,12 @@ namespace Platform_Learning_Test.Common.Profiles
         public TestProfile()
         {
             CreateMap<Test, TestDto>();
-            CreateMap<CreateTestDto, Test>();
+            CreateMap<CreateTestDto, Test>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
+            .ForMember(dest => dest.Questions, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+            .ForMember(dest => dest.Duration, opt => opt.MapFrom(src =>
+                src.Duration > TimeSpan.Zero ? src.Duration : TimeSpan.FromHours(1)));
             CreateMap<UpdateTestDto, Test>();
         }
     }

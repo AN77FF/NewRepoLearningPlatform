@@ -12,6 +12,11 @@ namespace Platform_Learning_Test.Domain.Dto
         public bool IsCorrect { get; set; }
         public string SelectedAnswer { get; set; }
         public string CorrectAnswer { get; set; }
+        public int QuestionId { get; set; }
+        public List<int>? SelectedAnswers { get; set; }
+        public List<int> CorrectAnswers { get; set; }
+
+        
     }
 
 }

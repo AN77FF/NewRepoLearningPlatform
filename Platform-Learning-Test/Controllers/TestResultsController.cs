@@ -6,6 +6,7 @@ using Platform_Learning_Test.Service.Service;
 namespace Platform_Learning_Test.Controllers
 {
     [Authorize]
+    [Route("TestResults")]
     public class TestResultsController : Controller
     {
         private readonly ITestResultService _testResultService;
@@ -41,9 +42,6 @@ namespace Platform_Learning_Test.Controllers
             try
             {
                 var result = await _testResultService.GetTestResultDetailsAsync(id);
-                if (result == null)
-                    return NotFound();
-
                 return View(result);
             }
             catch (Exception ex)

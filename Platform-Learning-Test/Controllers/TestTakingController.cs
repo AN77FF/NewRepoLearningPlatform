@@ -7,6 +7,7 @@ using Platform_Learning_Test.Service.Service;
 namespace Platform_Learning_Test.Controllers
 {
     [Authorize]
+    [Route("TestTaking")]
     public class TestTakingController : Controller
     {
         private readonly ITestService _testService;
@@ -25,7 +26,7 @@ namespace Platform_Learning_Test.Controllers
         public async Task<IActionResult> StartTest(int testId)
         {
             var test = await _testService.GetTestWithDetailsAsync(testId);
-            return View(test);
+            return View("~/Views/Tests/StartTest.cshtml", test);
         }
 
         [HttpPost("Test/{testId}/Submit")]
@@ -33,6 +34,8 @@ namespace Platform_Learning_Test.Controllers
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var result = await _testResultService.SubmitTestAsync(submitDto, userId);
+
+            
             return RedirectToAction("Details", "TestResults", new { id = result.Id });
         }
     }

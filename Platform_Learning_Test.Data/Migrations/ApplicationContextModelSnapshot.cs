@@ -110,6 +110,25 @@ namespace Platform_Learning_Test.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.AdminDashboardStats", b =>
+                {
+                    b.Property<int>("ActiveTests")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NewUsers")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalTests")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalUsers")
+                        .HasColumnType("int");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_DashboardStats", (string)null);
+                });
+
             modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.AnswerOption", b =>
                 {
                     b.Property<int>("Id")
@@ -242,6 +261,9 @@ namespace Platform_Learning_Test.Data.Migrations
                     b.Property<bool>("IsFeatured")
                         .HasColumnType("bit");
 
+                    b.Property<double>("TimeLimitSeconds")
+                        .HasColumnType("float");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -253,6 +275,37 @@ namespace Platform_Learning_Test.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tests", (string)null);
+                });
+
+            modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.TestResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CompletionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalQuestions")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestId");
+
+                    b.ToTable("TestResults");
                 });
 
             modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.TestReview", b =>
@@ -520,6 +573,17 @@ namespace Platform_Learning_Test.Data.Migrations
                 {
                     b.HasOne("Platform_Learning_Test.Domain.Entities.Test", "Test")
                         .WithMany("Questions")
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Test");
+                });
+
+            modelBuilder.Entity("Platform_Learning_Test.Domain.Entities.TestResult", b =>
+                {
+                    b.HasOne("Platform_Learning_Test.Domain.Entities.Test", "Test")
+                        .WithMany()
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

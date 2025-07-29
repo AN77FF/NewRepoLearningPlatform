@@ -1,0 +1,19 @@
+﻿@model Platform_Learning_Test.Domain.Dto.QuestionDto
+@{
+    ViewData["Title"] = "Удалить вопрос";
+}
+
+<h1>Удаление вопроса</h1>
+<h3>Вы уверены?</h3>
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Текст вопроса</dt>
+        <dd class="col-sm-10">@Model.Text</dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <input type="submit" value="Удалить" class="btn btn-danger" />
+        <a asp-action="Index" asp-controller="Questions" asp-route-testId="@ViewBag.TestId" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>

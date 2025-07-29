@@ -34,6 +34,7 @@ namespace Platform_Learning_Test.Domain.Entities
         public string? ImageUrl { get; set; } 
         public ICollection<Question> Questions { get; set; } = new List<Question>();
         public bool IsFeatured { get; set; }
+        public double TimeLimitSeconds { get; set; }
     }
 
     public enum TestDifficulty

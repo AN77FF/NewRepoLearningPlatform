@@ -6,7 +6,7 @@ using Platform_Learning_Test.Domain.Entities;
 namespace Platform_Learning_Test.Controllers
 {
     [Authorize(Roles = "Admin")]
-    [Route("admin")]
+    [Route("admin/stats")]
     public class AdminController : Controller
     {
         private readonly ApplicationContext _context;
@@ -16,7 +16,7 @@ namespace Platform_Learning_Test.Controllers
             _context = context;
         }
 
-        [HttpGet("dashboard")]
+        [HttpGet("stats")]
         public IActionResult Dashboard()
         {
             var stats = new AdminDashboardStats

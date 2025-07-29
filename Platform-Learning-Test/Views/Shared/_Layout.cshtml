@@ -30,8 +30,10 @@
                                     Администрирование
                                 </a>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item" asp-controller="Questions" asp-action="Index">Вопросы</a>
-                                    <a class="dropdown-item" asp-controller="AnswerOptions" asp-action="Index">Варианты ответов</a>
+                                    <a class="dropdown-item" asp-controller="AdminDashboard" asp-action="Index">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Панель управления
+                                    </a>
+                                   
                                 </div>
                             </li>
                         }
@@ -57,7 +59,17 @@
             &copy; @DateTime.Now.Year - Learning Platform
         </div>
     </footer>
-
+    <script>
+        $(document).ready(function() {
+           
+            if ('@TempData["SuccessMessage"]' !== '') {
+                toastr.success('@TempData["SuccessMessage"]');
+            }
+            if ('@TempData["ErrorMessage"]' !== '') {
+                toastr.error('@TempData["ErrorMessage"]');
+            }
+        });
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

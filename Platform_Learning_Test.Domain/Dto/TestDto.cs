@@ -16,5 +16,6 @@ namespace Platform_Learning_Test.Domain.Dto
         public DateTime CreatedAt { get; set; }
         public TimeSpan Duration { get; set; }
         public string? ImageUrl { get; set; }
+        public int QuestionCount { get; set; }
     }
 }

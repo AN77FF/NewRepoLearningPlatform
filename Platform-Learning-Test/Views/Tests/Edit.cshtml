@@ -8,7 +8,7 @@
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Edit Test</h4>
+            <h4 class="mb-0">Редактировать тест</h4>
         </div>
         <div class="card-body">
             <form asp-action="Edit">
@@ -53,11 +53,14 @@
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                     <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary me-md-2">
-                        <i class="fas fa-arrow-left"></i> Cancel
+                        <i class="fas fa-arrow-left"></i> Назад к списку
                     </a>
+                    <form asp-action="SubmitTest" asp-controller="Tests" method="post">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
+                        <i class="fas fa-save"></i> Сохранить изменения
+
                     </button>
+                    </form>
                 </div>
             </form>
         </div>

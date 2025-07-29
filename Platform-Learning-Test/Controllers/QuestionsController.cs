@@ -1,25 +1,33 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Platform_Learning_Test.Data.Context;
 using Platform_Learning_Test.Domain.Dto;
+using Platform_Learning_Test.Domain.Entities;
 using Platform_Learning_Test.Service.Service;
+using Platform_Learning_Test.Domain.Extensions;
 
 namespace Platform_Learning_Test.Controllers
 {
     [Authorize(Roles = "Admin,Teacher")]
+    [Route("Admin/Questions")]
     public class QuestionsController : Controller
     {
         private readonly IQuestionService _questionService;
         private readonly ITestService _testService;
         private readonly ILogger<QuestionsController> _logger;
+        private readonly ApplicationContext _context;
 
         public QuestionsController(
             IQuestionService questionService,
             ITestService testService,
-            ILogger<QuestionsController> logger)
+            ILogger<QuestionsController> logger,
+            ApplicationContext context)
         {
             _questionService = questionService;
             _testService = testService;
             _logger = logger;
+            _context = context;
         }
 
         [HttpGet("Test/{testId}")]
@@ -42,71 +50,93 @@ namespace Platform_Learning_Test.Controllers
             }
         }
 
-        [HttpGet("Create/{testId}")]
-        public async Task<IActionResult> Create(int testId)
+        [HttpGet("Create")]
+        public IActionResult Create(int testId = 0)
         {
-            try
-            {
-                var test = await _testService.GetTestWithDetailsAsync(testId);
-                if (test == null)
-                    return NotFound();
+            ViewBag.Tests = _context.Tests.ToList();
+            ViewBag.TestId = testId;
 
-                ViewBag.TestId = testId;
-                return View(new CreateQuestionDto { TestId = testId });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error getting create question view for test {testId}");
-                return View("Error");
-            }
+            var model = new CreateQuestionDto { TestId = testId };
+            return View(model);
         }
 
-        [HttpPost("Create/{testId}")]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int testId, CreateQuestionDto questionDto)
+        public async Task<IActionResult> Create(CreateQuestionDto dto)
         {
-            if (testId != questionDto.TestId)
-                return BadRequest();
-
             if (!ModelState.IsValid)
             {
-                ViewBag.TestId = testId;
-                return View(questionDto);
+                ViewBag.Tests = await _context.Tests.ToListAsync();
+                return View(dto);
             }
 
             try
             {
-                await _questionService.CreateQuestionAsync(questionDto);
-                return RedirectToAction(nameof(Index), new { testId });
+                var test = await _context.Tests.FindAsync(dto.TestId);
+                if (test == null)
+                {
+                    ModelState.AddModelError("", "Указанный тест не существует");
+                    ViewBag.Tests = await _context.Tests.ToListAsync();
+                    return View(dto);
+                }
+
+                
+                var question = new Question
+                {
+                    Text = dto.Text,
+                    TestId = dto.TestId,
+                    Difficulty = Enum.Parse<QuestionDifficulty>(dto.Difficulty),
+                    TimeLimitSeconds = dto.TimeLimitSeconds
+                };
+
+             
+                foreach (var answerDto in dto.AnswerOptions)
+                {
+                    question.AnswerOptions.Add(new AnswerOption
+                    {
+                        Text = answerDto.Text,
+                        IsCorrect = answerDto.IsCorrect
+                    });
+                }
+
+                await _context.Questions.AddAsync(question);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Index", "AdminDashboard");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error creating question for test {testId}");
-                ModelState.AddModelError("", "Error creating question");
-                ViewBag.TestId = testId;
-                return View(questionDto);
+                _logger.LogError(ex, "Error creating question");
+                ModelState.AddModelError("", $"Ошибка: {ex.Message}");
+                ViewBag.Tests = await _context.Tests.ToListAsync();
+                return View(dto);
             }
         }
-
         [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                var question = await _questionService.GetQuestionAsync(id);
-                if (question == null)
-                    return NotFound();
+                var question = await _context.Questions
+                    .Include(q => q.AnswerOptions)
+                    .FirstOrDefaultAsync(q => q.Id == id);
 
-                var updateDto = new UpdateQuestionDto
+                if (question == null) return NotFound();
+
+                return View(new UpdateQuestionDto
                 {
                     Id = question.Id,
                     Text = question.Text,
                     Difficulty = question.Difficulty.ToString(),
                     TimeLimitSeconds = question.TimeLimitSeconds,
-                    TestId = question.TestId
-                };
-
-                return View(updateDto);
+                    TestId = question.TestId,
+                    AnswerOptions = question.AnswerOptions.Select(a => new UpdateAnswerOptionDto
+                    {
+                        Id = a.Id,
+                        Text = a.Text,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
+                });
             }
             catch (Exception ex)
             {
@@ -114,39 +144,60 @@ namespace Platform_Learning_Test.Controllers
                 return View("Error");
             }
         }
-
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateQuestionDto questionDto)
+        public async Task<IActionResult> Edit(int id, UpdateQuestionDto dto)
         {
-            if (id != questionDto.Id)
-                return BadRequest();
+            if (id != dto.Id) return NotFound();
 
-            if (!ModelState.IsValid)
-                return View(questionDto);
+            if (!ModelState.IsValid) return View(dto);
 
             try
             {
-                await _questionService.UpdateQuestionAsync(questionDto);
-                return RedirectToAction(nameof(Index), new { testId = questionDto.TestId });
+                var question = await _context.Questions
+                    .Include(q => q.AnswerOptions)
+                    .FirstOrDefaultAsync(q => q.Id == id);
+
+                if (question == null) return NotFound();
+
+                
+                question.Text = dto.Text;
+                question.Difficulty = Enum.Parse<QuestionDifficulty>(dto.Difficulty);
+                question.TimeLimitSeconds = dto.TimeLimitSeconds;
+                question.TestId = dto.TestId;
+
+               
+                foreach (var answerDto in dto.AnswerOptions)
+                {
+                    var existingAnswer = question.AnswerOptions
+                        .FirstOrDefault(a => a.Id == answerDto.Id);
+
+                    if (existingAnswer != null)
+                    {
+                        existingAnswer.Text = answerDto.Text;
+                        existingAnswer.IsCorrect = answerDto.IsCorrect;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index", "AdminDashboard");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating question with id {id}");
-                ModelState.AddModelError("", "Error updating question");
-                return View(questionDto);
+                _logger.LogError(ex, $"Error updating question {id}");
+                ModelState.AddModelError("", $"Ошибка: {ex.Message}");
+                return View(dto);
             }
         }
-
         [HttpGet("Delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
                 var question = await _questionService.GetQuestionAsync(id);
-                if (question == null)
-                    return NotFound();
+                if (question == null) return NotFound();
 
+                ViewBag.TestId = question.TestId;
                 return View(question);
             }
             catch (Exception ex)
@@ -162,13 +213,8 @@ namespace Platform_Learning_Test.Controllers
         {
             try
             {
-                var question = await _questionService.GetQuestionAsync(id);
-                if (question == null)
-                    return NotFound();
-
-                var testId = question.TestId;
                 await _questionService.DeleteQuestionAsync(id);
-                return RedirectToAction(nameof(Index), new { testId });
+                return RedirectToAction("Index", "AdminDashboard");
             }
             catch (Exception ex)
             {
@@ -176,6 +222,6 @@ namespace Platform_Learning_Test.Controllers
                 return View("Error");
             }
         }
-    }
 
+    }
 }

@@ -12,6 +12,7 @@ namespace Platform_Learning_Test.Domain.Dto
         public int QuestionId { get; set; }
         public int AnswerOptionId { get; set; }
         public DateTime AnswerTime { get; set; }
+        public List<int>? SelectedAnswerIds { get; set; }
     }
 
 }

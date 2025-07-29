@@ -24,6 +24,11 @@ namespace Platform_Learning_Test.Domain.Dto
         [Required]
         [StringLength(100)]
         public string Category { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public TimeSpan Duration { get; set; } = TimeSpan.FromHours(1);
+        public bool IsFeatured { get; set; } = false;
+
     }
 
 }

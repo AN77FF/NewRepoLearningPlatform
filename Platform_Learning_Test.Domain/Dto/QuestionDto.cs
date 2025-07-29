@@ -13,6 +13,7 @@ namespace Platform_Learning_Test.Domain.Dto
         public int TestId { get; set; }
         public string Difficulty { get; set; }
         public int TimeLimitSeconds { get; set; }
+        public string TestTitle { get; set; }
         public List<AnswerOptionDto> AnswerOptions { get; set; } = new();
     }
 

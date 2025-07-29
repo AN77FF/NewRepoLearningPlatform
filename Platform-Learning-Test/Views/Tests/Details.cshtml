@@ -1,85 +1,73 @@
-﻿@model Platform_Learning_Test.Domain.Dto.TestResultDetailsDto
+﻿@model Platform_Learning_Test.Domain.Dto.TestDetailDto
 
 @{
-    ViewData["Title"] = "Детали результата теста";
+    ViewData["Title"] = $"Детали теста: {Model.Title}";
 }
 
 <div class="container mt-4">
-    <h2>@ViewData["Title"]</h2>
-
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>@Model.TestTitle</h4>
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>@Model.Title</h4>
+            <p class="mb-0">@Model.Description</p>
         </div>
+
         <div class="card-body">
-            <div class="row">
+            <div class="row mb-4">
                 <div class="col-md-6">
-                    <p><strong>Дата завершения:</strong> @Model.CompletedAt.ToString("g")</p>
-                    <p><strong>Правильных ответов:</strong> @Model.CorrectAnswers из @Model.TotalQuestions</p>
+                    <p><strong>Категория:</strong> @Model.Category</p>
+                    <p><strong>Сложность:</strong> @Model.Difficulty</p>
+                    <p><strong>Дата создания:</strong> @Model.CreatedAt.ToString("d")</p>
+                    <p><strong>Продолжительность:</strong> @Model.Duration.ToString(@"hh\:mm")</p>
                 </div>
                 <div class="col-md-6">
-                    <div class="text-center">
-                        <div class="result-circle mx-auto mb-3">
-                            <h2 class="result-percent">@Model.ScorePercentage.ToString("0")%</h2>
-                        </div>
-                        <h4>@GetResultMessage(Model.ScorePercentage)</h4>
-                    </div>
+                    <p><strong>Количество вопросов:</strong> @Model.Questions.Count</p>
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" class="img-fluid rounded" alt="Изображение теста">
+                    }
                 </div>
             </div>
+
+            
+
+            <a asp-controller="TestTaking" asp-action="StartTest" asp-route-testId="@Model.Id"
+               class="btn btn-success btn-lg">
+                <i class="fas fa-play"></i> Начать тест
+            </a>
         </div>
     </div>
 
-    <h4>Детали по вопросам</h4>
-    @foreach (var result in Model.QuestionResults)
-    {
-        <div class="card mb-3 @(result.IsCorrect ? "border-success" : "border-danger")">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <h5>@result.QuestionText</h5>
-                    <span class="badge bg-@(result.IsCorrect ? "success" : "danger")">
-                        @(result.IsCorrect ? "Правильно" : "Неправильно")
-                    </span>
-                </div>
-                <p class="mt-2"><strong>Ваш ответ:</strong> @result.SelectedAnswer</p>
-                @if (!result.IsCorrect)
-                {
-                    <p><strong>Правильный ответ:</strong> @result.CorrectAnswer</p>
-                }
-            </div>
-        </div>
-    }
-
-
-    <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
-</div>
-
-@functions {
-    string GetResultMessage(double percentage)
-    {
-        return percentage switch
+    <div class="mt-4">
+        <h4>Вопросы теста</h4>
+        @foreach (var question in Model.Questions)
         {
-            >= 80 => "Отличный результат!",
-            >= 60 => "Хороший результат!",
-            >= 40 => "Можно лучше!",
-            _ => "Попробуйте еще раз!"
-        };
-    }
-}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>@question.Text</h5>
+                    <p><strong>Сложность:</strong> @question.Difficulty</p>
+                    <p><strong>Время на ответ:</strong> @question.TimeLimitSeconds сек</p>
 
-<style>
-    .result-circle {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        background: conic-gradient( #28a745 @(Model.ScorePercentage * 3.6) deg, #e9ecef @(Model.ScorePercentage * 3.6) deg 360deg );
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+                    <div class="mt-3">
+                        <h6>Варианты ответов:</h6>
+                        <ul class="list-group">
+                            @foreach (var answer in question.AnswerOptions)
+                            {
+                                <li class="list-group-item @(answer.IsCorrect ? "list-group-item-success" : "")">
+                                    @if (answer.IsCorrect)
+                                    {
+                                        <span class="badge bg-success me-2">✓</span>
+                                    }
+                                    @answer.Text
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 
-    .result-percent {
-        color: #495057;
-        font-weight: bold;
-        margin: 0;
-    }
-</style>
+    <a asp-action="Index" class="btn btn-secondary mt-3">
+        <i class="fas fa-arrow-left"></i> Назад к списку тестов
+    </a>
+</div>

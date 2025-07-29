@@ -11,6 +11,7 @@ namespace Platform_Learning_Test.Service.Service
     {
         Task<AnswerOptionDto> GetAnswerAsync(int id);
         Task<IEnumerable<AnswerOptionDto>> GetAnswersForQuestionAsync(int questionId);
+        Task<IEnumerable<AnswerOptionDto>> GetAllAnswerOptionsAsync();
         Task<AnswerOptionDto> CreateAnswerAsync(CreateAnswerOptionDto dto);
         Task UpdateAnswerAsync(UpdateAnswerOptionDto dto);
         Task DeleteAnswerAsync(int id);

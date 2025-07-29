@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Platform_Learning_Test.Domain.Dto;
 using Platform_Learning_Test.Service.Service;
 using Platform_Learning_Test.Models.Account;
+using Microsoft.AspNetCore.Identity;
+using Platform_Learning_Test.Domain.Entities;
 
 namespace Platform_Learning_Test.Controllers
 {
@@ -13,13 +15,19 @@ namespace Platform_Learning_Test.Controllers
     {
         private readonly IProfileService _profileService;
         private readonly ITestResultService _testResultService;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
         public ProfileController(
             IProfileService profileService,
-            ITestResultService testResultService)
+            ITestResultService testResultService, 
+            UserManager<User> userManager,
+            SignInManager<User> signInManager)
         {
             _profileService = profileService;
             _testResultService = testResultService;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [HttpGet("")] 
@@ -55,6 +63,11 @@ namespace Platform_Learning_Test.Controllers
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             await _profileService.UpdateUserProfileAsync(userId, dto);
+
+            
+            var user = await _userManager.GetUserAsync(User);
+            await _signInManager.RefreshSignInAsync(user);
+
             return RedirectToAction(nameof(Index));
         }
     }

@@ -24,7 +24,10 @@ namespace Platform_Learning_Test.Domain.Dto
         [Range(10, 300)]
         public int TimeLimitSeconds { get; set; }
 
+        [Required]
         public int TestId { get; set; }
+
+
 
         [MinLength(2)]
         public List<UpdateAnswerOptionDto> AnswerOptions { get; set; } = new();

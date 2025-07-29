@@ -9,7 +9,7 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body text-center">
-                    <img src="@(Model.Profile.AvatarUrl ?? "https://via.placeholder.com/150")"
+                    <img src="@(Model.Profile.AvatarUrl ?? "https://via.placeholder.com/150")?v=@DateTime.Now.Ticks"
                          class="rounded-circle mb-3" alt="Avatar" width="150" height="150">
                     <h4>@Model.Profile.Name</h4>
                     <p class="text-muted">@Model.Profile.Email</p>

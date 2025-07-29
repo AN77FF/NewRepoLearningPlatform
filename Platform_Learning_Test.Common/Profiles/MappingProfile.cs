@@ -15,7 +15,7 @@ namespace Platform_Learning_Test.Common.Profiles
                 .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration))
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl));
             CreateMap<Test, TestDetailDto>();
-            CreateMap<CreateTestDto, Test>();
+           
             CreateMap<UpdateTestDto, Test>();
 
             CreateMap<Question, QuestionDto>();

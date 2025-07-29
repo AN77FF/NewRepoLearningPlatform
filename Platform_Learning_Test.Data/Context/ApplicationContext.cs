@@ -19,6 +19,8 @@ namespace Platform_Learning_Test.Data.Context
         public DbSet<UserAnswer> UserAnswers { get; set; }
         public DbSet<TestReview> TestReviews { get; set; }
         public DbSet<UserTestHistory> UserTestHistories { get; set; }
+        public DbSet<AdminDashboardStats> DashboardStats { get; set; }
+        public DbSet<TestResult> TestResults { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options) { }
@@ -68,7 +70,11 @@ namespace Platform_Learning_Test.Data.Context
                       .HasForeignKey(ur => ur.RoleId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
-
+            builder.Entity<AdminDashboardStats>(entity =>
+            {
+                entity.HasNoKey();
+                entity.ToView("vw_DashboardStats"); 
+            });
 
             ConfigureTestSystemEntities(builder);
         }

@@ -1,5 +1,4 @@
 ﻿@model Platform_Learning_Test.Domain.Dto.TestDetailDto
-
 @{
     ViewData["Title"] = $"Тест: {Model.Title}";
 }
@@ -34,14 +33,10 @@
             let timer;
             let timeLeft;
 
+
             $('#startTestBtn').click(function() {
                 loadQuestion(0);
-                startTimer();
             });
-
-            function startTimer() {
-                // Таймер для всего теста (опционально)
-            }
 
             function loadQuestion(index) {
                 if (index >= questions.length) {

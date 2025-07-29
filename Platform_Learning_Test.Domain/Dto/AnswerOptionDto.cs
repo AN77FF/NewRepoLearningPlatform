@@ -12,6 +12,9 @@ namespace Platform_Learning_Test.Domain.Dto
         public string Text { get; set; }
         public bool IsCorrect { get; set; }
         public int QuestionId { get; set; }
+
+        public string QuestionText { get; set; }
+        public dynamic TestId { get; set; }
     }
 
 }
